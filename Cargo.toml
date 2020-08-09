@@ -11,6 +11,6 @@ publish = false
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ionic_deckhandler = { path = "../ionic-deckhandler" }
+#ionic_deckhandler = { path = "../ionic-deckhandler" }
 
-# ionic_deckhandler = { git = "https://github.com/TelluricDeckay/ionic-deckhandler" }
+ionic_deckhandler = { git = "https://github.com/TelluricDeckay/ionic-deckhandler", branch = "trunk" }
