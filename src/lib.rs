@@ -1,30 +1,42 @@
 use ionic_deckhandler::{card_type, suit, Card, Deck};
 
-enum PokerRank {
-    Pair,
-    TwoPair,
-    ThreeOfAKind,
-    Straight,
-    Flush,
-    FullHouse,
-    FourOfAKind,
-    StraightFlush,
-    RoyalFlush,
+pub struct PokerRank {
+    lit: String,
+    value: i32,
 }
 
+const PAIR: i32 = 0;
+const TWO_PAIR: i32 = 1;
+const THREE_OF_A_KIND: i32 = 2;
+const STRAIGHT: i32 = 3;
+const FLUSH: i32 = 4;
+const FULL_HOUSE: i32 = 5;
+const FOUR_OF_A_KIND: i32 = 6;
+const STRAIGHT_FLUSH: i32 = 7;
+const ROYAL_FLUSH: i32 = 8;
+
+const NUM_OF_RANKS: i32 = 9;
+
 impl PokerRank {
-    fn rank_value(&self) -> i32 {
-        match *self {
-            PokerRank::Pair => 1,
-            PokerRank::TwoPair => 2,
-            PokerRank::ThreeOfAKind => 3,
-            PokerRank::Straight => 4,
-            PokerRank::Flush => 5,
-            PokerRank::FullHouse => 6,
-            PokerRank::FourOfAKind => 7,
-            PokerRank::StraightFlush => 8,
-            PokerRank::RoyalFlush => 9,
+    pub fn new(lit: String, value: i32) -> Self {
+        Self {
+            lit: lit,
+            value: value,
         }
+    }
+
+    pub fn init_ranks() -> [PokerRank; NUM_OF_RANKS as usize] {
+        [
+            PokerRank::new(String::from("Pair"), PAIR),
+            PokerRank::new(String::from("Two of a kind"), TWO_PAIR),
+            PokerRank::new(String::from("Three of a kind"), THREE_OF_A_KIND),
+            PokerRank::new(String::from("Straight"), STRAIGHT),
+            PokerRank::new(String::from("Flush"), FLUSH),
+            PokerRank::new(String::from("Full House"), FULL_HOUSE),
+            PokerRank::new(String::from("Four of a kind"), FOUR_OF_A_KIND),
+            PokerRank::new(String::from("Straight Flush"), STRAIGHT_FLUSH),
+            PokerRank::new(String::from("Royal Flush"), ROYAL_FLUSH),
+        ]
     }
 }
 
