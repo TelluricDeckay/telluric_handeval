@@ -28,17 +28,13 @@ impl PokerRank {
     }
 }
 
-pub struct Hand(Card, Card, Card, Card, Card);
+/* Compiles. prevents repetitive code, but isn't needed because hand is already
+ * an array. Maybe this will give you ideas though. */
+pub struct Hand([Card; 5]);
 
 impl Hand {
     pub fn new(hand: &[Card; 5]) -> Self {
-        Self {
-            0: hand[0],
-            1: hand[1],
-            2: hand[2],
-            3: hand[3],
-            4: hand[4],
-        }
+        Self { 0: *hand }
     }
 }
 
@@ -59,8 +55,13 @@ fn test_evaluate() {
         Card::new(&suit::CLUB, &card_type::QUEEN),
     ];
 
-    println!("{}", &hand_arr[2].value);
+    let st_hand = Hand::new(&hand_arr);
+    for card in 0..5 {
+        println!("{}", st_hand.0[card].value);
+    }
 
+    println!();
+    println!("{}", hand_arr[2].value);
     assert!(true)
 }
 
