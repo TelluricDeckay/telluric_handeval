@@ -1,4 +1,4 @@
-use ionic_deckhandler::{Card, Deck};
+use ionic_deckhandler::{card_type, suit, Card, Deck};
 
 enum PokerRank {
     Pair,
@@ -13,7 +13,7 @@ enum PokerRank {
 }
 
 impl PokerRank {
-    fn value(&self) -> i32 {
+    fn rank_value(&self) -> i32 {
         match *self {
             PokerRank::Pair => 1,
             PokerRank::TwoPair => 2,
@@ -31,18 +31,18 @@ impl PokerRank {
 pub struct Hand(Card, Card, Card, Card, Card);
 
 impl Hand {
-    pub fn new(deck: &mut Vec<Card>) -> Self {
+    pub fn new(hand: &[Card; 5]) -> Self {
         Self {
-            0: deck.take_from_top().expect("Error, deck is empty!"),
-            1: deck.take_from_top().expect("Error, deck is empty!"),
-            2: deck.take_from_top().expect("Error, deck is empty!"),
-            3: deck.take_from_top().expect("Error, deck is empty!"),
-            4: deck.take_from_top().expect("Error, deck is empty!"),
+            0: hand[0],
+            1: hand[1],
+            2: hand[2],
+            3: hand[3],
+            4: hand[4],
         }
     }
 }
 
-pub fn evaluate(hand: Hand) -> i32 {
+pub fn evaluate(hand: &[Card; 5]) -> i32 {
     //
     // existing algorithm in C, but probably will be done differently
     // https://github.com/theimpossibleastronaut/aa-pokerhands/blob/master/src/functions.c#L155-L187
@@ -51,30 +51,17 @@ pub fn evaluate(hand: Hand) -> i32 {
 
 #[test]
 fn test_evaluate() {
-    let mut deck = ionic_deckhandler::Card::get_deck();
-    {
-        let first_card = &deck[0];
-        assert_eq!(format!("{}", first_card.get_suit()), String::from("♣"));
-    }
-    deck.shuffle_deck();
+    let hand_arr: [Card; 5] = [
+        Card::new(&suit::CLUB, &card_type::ACE),
+        Card::new(&suit::HEART, &card_type::THREE),
+        Card::new(&suit::DIAMOND, &card_type::THREE),
+        Card::new(&suit::CLUB, &card_type::KING),
+        Card::new(&suit::CLUB, &card_type::QUEEN),
+    ];
 
-    // create an instance of hand
-    let hand = crate::Hand::new(&mut deck);
-    assert_eq!(evaluate(hand), 5);
-}
+    println!("{}", &hand_arr[2].value);
 
-#[test]
-fn test_create_deck() {
-    let mut deck = ionic_deckhandler::Card::get_deck();
-    {
-        let first_card = &deck[0];
-        assert_eq!(format!("{}", first_card.get_suit()), String::from("♣"));
-    }
-    deck.shuffle_deck();
-
-    for card in 0..5 {
-        println!("{}", &deck[card]);
-    }
+    assert!(true)
 }
 
 #[cfg(test)]
