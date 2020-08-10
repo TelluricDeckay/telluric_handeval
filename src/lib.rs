@@ -1,9 +1,6 @@
 use ionic_deckhandler::{card_type, suit, Card, Deck};
 
-pub struct PokerRank {
-    lit: String,
-    value: i32,
-}
+pub struct PokerRank(String);
 
 const PAIR: i32 = 0;
 const TWO_PAIR: i32 = 1;
@@ -18,24 +15,21 @@ const ROYAL_FLUSH: i32 = 8;
 const NUM_OF_RANKS: i32 = 9;
 
 impl PokerRank {
-    pub fn new(lit: String, value: i32) -> Self {
-        Self {
-            lit: lit,
-            value: value,
-        }
+    pub fn new(lit: String) -> Self {
+        Self { 0: lit }
     }
 
     pub fn init_ranks() -> [PokerRank; NUM_OF_RANKS as usize] {
         [
-            PokerRank::new(String::from("Pair"), PAIR),
-            PokerRank::new(String::from("Two of a kind"), TWO_PAIR),
-            PokerRank::new(String::from("Three of a kind"), THREE_OF_A_KIND),
-            PokerRank::new(String::from("Straight"), STRAIGHT),
-            PokerRank::new(String::from("Flush"), FLUSH),
-            PokerRank::new(String::from("Full House"), FULL_HOUSE),
-            PokerRank::new(String::from("Four of a kind"), FOUR_OF_A_KIND),
-            PokerRank::new(String::from("Straight Flush"), STRAIGHT_FLUSH),
-            PokerRank::new(String::from("Royal Flush"), ROYAL_FLUSH),
+            PokerRank::new(String::from("Pair")),
+            PokerRank::new(String::from("Two of a kind")),
+            PokerRank::new(String::from("Three of a kind")),
+            PokerRank::new(String::from("Straight")),
+            PokerRank::new(String::from("Flush")),
+            PokerRank::new(String::from("Full House")),
+            PokerRank::new(String::from("Four of a kind")),
+            PokerRank::new(String::from("Straight Flush")),
+            PokerRank::new(String::from("Royal Flush")),
         ]
     }
 }
