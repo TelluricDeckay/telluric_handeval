@@ -28,10 +28,11 @@ impl PokerRankOrder {
             PokerRankOrder::RoyalFlush => 9,
         }
     }
-} */
+}
+*/
 
-/*
-impl PokerRank {
+// This implementation was suggested by #![feature(Brainlet)] on Discord
+impl PokerRankOrder {
     pub fn name(&self) -> &'static str {
         match self {
             Self::Pair => "Pair",
@@ -46,13 +47,14 @@ impl PokerRank {
         }
     }
 }
-
+/*
 fn main() {
-    let my_rank = PokerRank::Pair;
+    let my_rank = PokerRankOrder::Pair;
     println!("{}", my_rank.name());
 }
 */
 
+/*
 struct PokerRank(&'static str);
 
 const NUM_OF_RANKS: i32 = 9;
@@ -76,6 +78,7 @@ impl PokerRank {
         ]
     }
 }
+*/
 
 pub fn evaluate(hand: &[Card; 5]) -> i32 {
     //
