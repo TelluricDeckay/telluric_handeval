@@ -1,4 +1,4 @@
-use ionic_deckhandler::{card_type, suit, Card, Deck};
+use ionic_deckhandler::{Card, Deck, Rank, Suit};
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum PokerRankOrder {
@@ -80,33 +80,130 @@ impl PokerRank {
 }
 */
 
-pub fn evaluate(hand: &[Card; 5]) -> i32 {
-    //
-    // existing algorithm in C, but probably will be done differently
-    // https://github.com/theimpossibleastronaut/aa-pokerhands/blob/master/src/functions.c#L155-L187
-    5
+// Evalute for a poker hand.
+//
+//
+pub fn evaluate(hand: &mut [Card; 5]) -> i32 {
+    hand.sort();
+    let last_index = hand.len() - 1;
+    let mut card_matches: [i32; 2] = [0, 0];
+    let mut break_in_card_matches: bool = false;
+    for card in 0..last_index {
+        println!("card {}", card);
+        match hand[card] == hand[card + 1] {
+            true => match card_matches[0] {
+                0 => card_matches[0] += 1,
+                _ => {
+                    if break_in_card_matches == false {
+                        card_matches[0] += 1;
+                    } else {
+                        card_matches[1] += 1;
+                    }
+                }
+            },
+            false => break_in_card_matches = true,
+        }
+    }
+
+    /*                if card_matches[0] == 0 {
+            card_matches[0] += 1;
+        } else {
+        if card_matches[0] >= 1 {
+            if break_in_card_matches == false {
+                card_matches[0] += 1;
+            } else {
+                card_matches[1] += 1;
+            }
+        } else {
+            card_matches[1] += 1;
+        }
+    }, */
+
+    if card_matches[0] == 0 {
+        return -1;
+    }
+
+    if card_matches[0] >= 1 && (card_matches[1] == 0) {
+        println!("matches 0 {}", card_matches[0]);
+        match card_matches[0] {
+            1 => return PokerRankOrder::Pair as i32,
+            2 => return PokerRankOrder::ThreeOfAKind as i32,
+            3 => return PokerRankOrder::FourOfAKind as i32,
+            _ => return -100, // More than 3 matches in a 5-card hand would be impossible (unless playing with a wild card)
+        }
+    }
+
+    // Check for two pair or full house
+    if card_matches[0] == card_matches[1] {
+        return PokerRankOrder::TwoPair as i32;
+    }
+
+    PokerRankOrder::FullHouse as i32
 }
 
 #[test]
-fn test_evaluate() {
-    #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+fn test_evaluate_pair() {
     let mut hand_arr: [Card; 5] = [
-        Card::new(&suit::CLUB, &card_type::ACE),
-        Card::new(&suit::HEART, &card_type::THREE),
-        Card::new(&suit::DIAMOND, &card_type::THREE),
-        Card::new(&suit::CLUB, &card_type::KING),
-        Card::new(&suit::CLUB, &card_type::QUEEN),
+        Card::new(Rank::Ace, Suit::Clubs),
+        Card::new(Rank::Three, Suit::Hearts),
+        Card::new(Rank::Three, Suit::Diamonds),
+        Card::new(Rank::King, Suit::Clubs),
+        Card::new(Rank::Queen, Suit::Clubs),
     ];
 
-    //
-    // Quicksort functions
-    // https://turreta.com/2019/10/22/quicksort-algorithm-example-in-rust/
-    // let last_index = hand_array.len() - 1;
+    assert_eq!(evaluate(&mut hand_arr), PokerRankOrder::Pair as i32);
+}
 
-    println!();
-    println!("{}", hand_arr[2].value);
-    println!();
-    assert!(PokerRankOrder::Flush == PokerRankOrder::Flush)
+#[test]
+fn test_evaluate_two_pair() {
+    let mut hand_arr: [Card; 5] = [
+        Card::new(Rank::Queen, Suit::Clubs),
+        Card::new(Rank::Three, Suit::Hearts),
+        Card::new(Rank::Three, Suit::Diamonds),
+        Card::new(Rank::King, Suit::Clubs),
+        Card::new(Rank::Queen, Suit::Clubs),
+    ];
+
+    assert_eq!(evaluate(&mut hand_arr), PokerRankOrder::TwoPair as i32);
+}
+
+#[test]
+fn test_evaluate_three_of_a_kind() {
+    let mut hand_arr: [Card; 5] = [
+        Card::new(Rank::Queen, Suit::Clubs),
+        Card::new(Rank::Four, Suit::Hearts),
+        Card::new(Rank::Four, Suit::Diamonds),
+        Card::new(Rank::King, Suit::Clubs),
+        Card::new(Rank::Four, Suit::Clubs),
+    ];
+
+    assert_eq!(evaluate(&mut hand_arr), PokerRankOrder::ThreeOfAKind as i32);
+}
+
+#[test]
+fn test_evaluate_full_house() {
+    let mut hand_arr: [Card; 5] = [
+        Card::new(Rank::Queen, Suit::Clubs),
+        Card::new(Rank::Four, Suit::Hearts),
+        Card::new(Rank::Four, Suit::Diamonds),
+        Card::new(Rank::Queen, Suit::Spades),
+        Card::new(Rank::Four, Suit::Clubs),
+    ];
+
+    assert_eq!(evaluate(&mut hand_arr), PokerRankOrder::FullHouse as i32);
+}
+
+#[test]
+fn test_evaluate_four_of_a_kind() {
+    let mut hand_arr: [Card; 5] = [
+        Card::new(Rank::Queen, Suit::Clubs),
+        Card::new(Rank::Four, Suit::Hearts),
+        Card::new(Rank::Four, Suit::Diamonds),
+        Card::new(Rank::Four, Suit::Spades),
+        Card::new(Rank::Four, Suit::Clubs),
+    ];
+
+    assert_eq!(evaluate(&mut hand_arr), PokerRankOrder::FourOfAKind as i32);
 }
 
 #[cfg(test)]
