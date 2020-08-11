@@ -105,20 +105,6 @@ pub fn evaluate(hand: &mut [Card; 5]) -> i32 {
         }
     }
 
-    /*                if card_matches[0] == 0 {
-            card_matches[0] += 1;
-        } else {
-        if card_matches[0] >= 1 {
-            if break_in_card_matches == false {
-                card_matches[0] += 1;
-            } else {
-                card_matches[1] += 1;
-            }
-        } else {
-            card_matches[1] += 1;
-        }
-    }, */
-
     if card_matches[0] == 0 {
         return -1;
     }
