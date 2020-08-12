@@ -2,6 +2,7 @@ use ionic_deckhandler::{Card, Deck, Rank, Suit};
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum PokerRankOrder {
+    Nothing,
     Pair,
     TwoPair,
     ThreeOfAKind,
@@ -35,6 +36,7 @@ impl PokerRankOrder {
 impl PokerRankOrder {
     pub fn name(&self) -> &'static str {
         match self {
+            Self::Nothing => "Nothing",
             Self::Pair => "Pair",
             Self::TwoPair => "Two of a kind",
             Self::ThreeOfAKind => "Three of a kind",
@@ -106,7 +108,7 @@ pub fn evaluate(hand: &mut [Card; 5]) -> i32 {
     }
 
     if card_matches[0] == 0 {
-        return -1;
+        return PokerRankOrder::Nothing as i32;
     }
 
     if card_matches[0] >= 1 && (card_matches[1] == 0) {
@@ -115,7 +117,8 @@ pub fn evaluate(hand: &mut [Card; 5]) -> i32 {
             1 => return PokerRankOrder::Pair as i32,
             2 => return PokerRankOrder::ThreeOfAKind as i32,
             3 => return PokerRankOrder::FourOfAKind as i32,
-            _ => return -100, // More than 3 matches in a 5-card hand would be impossible (unless playing with a wild card)
+            // Error handling: see https://github.com/theimpossibleastronaut/rmwrs/blob/fabcf801a65a7d86a380573cf60ef7dff6d85511/src/lib.rs#L139
+            _ => return -100,
         }
     }
 
@@ -190,6 +193,19 @@ fn test_evaluate_four_of_a_kind() {
     ];
 
     assert_eq!(evaluate(&mut hand_arr), PokerRankOrder::FourOfAKind as i32);
+}
+
+#[test]
+fn test_evaluate_nothing() {
+    let mut hand_arr: [Card; 5] = [
+        Card::new(Rank::Queen, Suit::Clubs),
+        Card::new(Rank::Five, Suit::Hearts),
+        Card::new(Rank::Eight, Suit::Diamonds),
+        Card::new(Rank::King, Suit::Spades),
+        Card::new(Rank::Ten, Suit::Clubs),
+    ];
+
+    assert_eq!(evaluate(&mut hand_arr), PokerRankOrder::Nothing as i32);
 }
 
 #[cfg(test)]
