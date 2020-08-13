@@ -18,7 +18,7 @@ mod poker {
     }
 
     impl HandRank {
-        fn name(&self) -> &'static str {
+        pub fn name(&self) -> &'static str {
             match self {
                 Self::Nothing => "Nothing",
                 Self::Pair => "Pair",
@@ -69,12 +69,12 @@ mod poker {
         // The [Card; 5] will probably be changed to an Option<T> later to account
         // for 7-card variations, using last_index here instead of a literal value.
         for card in 0..last_index {
-            println!("card {},{}", card, Card::get_rank(&hand[card]) as i32);
+            // println!("card {},{}", card, Card::get_rank(&hand[card]) as i32);
             match hand[card] == hand[card + 1] {
                 true => match card_matches[0] {
                     0 => card_matches[0] += 1,
                     _ => {
-                        if break_in_card_matches == false {
+                        if !break_in_card_matches {
                             card_matches[0] += 1;
                         } else {
                             card_matches[1] += 1;
@@ -133,7 +133,7 @@ mod poker {
         }
 
         if card_matches[0] >= 1 && (card_matches[1] == 0) {
-            println!("matches 0 {}", card_matches[0]);
+            // println!("matches 0 {}", card_matches[0]);
             match card_matches[0] {
                 1 => return HandRank::Pair,
                 2 => return HandRank::ThreeOfAKind,
@@ -159,8 +159,8 @@ mod tests {
         assert_eq!(2 + 2, 4);
     }
 
-    use crate::poker::{self, evaluate, HandRank};
-    use ionic_deckhandler::{Card, Rank, Suit};
+    use crate::poker::{evaluate, HandRank};
+    use ionic_deckhandler::{Card, Deck, Rank, Suit};
 
     #[test]
     fn test_evaluate_pair() {
@@ -340,5 +340,38 @@ mod tests {
             Card::new(Rank::Queen, Suit::Clubs),
         ];
         assert_eq!(evaluate(&mut hand_arr), HandRank::InvalidHand);
+    }
+
+    #[test]
+    #[ignore]
+    fn test_multiple_ranks() {
+        let mut deck = Card::get_deck();
+        let mut pairs = 0;
+        let mut three_of_a_kinds = 0;
+        let mut straights = 0;
+        let mut straight_flushes = 0;
+        let mut royal_flushes = 0;
+
+        let hands_dealt = 100000;
+
+        for _i in 0..hands_dealt {
+            deck.shuffle_deck();
+            let mut hand_arr: [Card; 5] = [deck[0], deck[1], deck[2], deck[3], deck[4]];
+
+            match evaluate(&mut hand_arr) {
+                HandRank::Pair => pairs += 1,
+                HandRank::ThreeOfAKind => three_of_a_kinds += 1,
+                HandRank::Straight => straights += 1,
+                HandRank::StraightFlush => straight_flushes += 1,
+                HandRank::RoyalFlush => royal_flushes += 1,
+                _ => (),
+            }
+        }
+        println!("Out of {} hands dealt...\n", hands_dealt);
+        println!("Pairs = {}", pairs);
+        println!("{} = {}", HandRank::ThreeOfAKind.name(), three_of_a_kinds);
+        println!("Straights = {}", straights);
+        println!("{} = {}", HandRank::StraightFlush.name(), straight_flushes);
+        println!("{} = {}", HandRank::RoyalFlush.name(), royal_flushes);
     }
 }
