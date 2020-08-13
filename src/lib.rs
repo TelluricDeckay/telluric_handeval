@@ -18,7 +18,7 @@ mod poker {
     }
 
     impl HandRank {
-        pub fn name(&self) -> &'static str {
+        fn name(&self) -> &'static str {
             match self {
                 Self::Nothing => "Nothing",
                 Self::Pair => "Pair",
@@ -150,6 +150,17 @@ mod poker {
 
         HandRank::FullHouse
     }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn it_works() {
+        assert_eq!(2 + 2, 4);
+    }
+
+    use crate::poker::{self, evaluate, HandRank};
+    use ionic_deckhandler::{Card, Rank, Suit};
 
     #[test]
     fn test_evaluate_pair() {
@@ -329,13 +340,5 @@ mod poker {
             Card::new(Rank::Queen, Suit::Clubs),
         ];
         assert_eq!(evaluate(&mut hand_arr), HandRank::InvalidHand);
-    }
-
-    #[cfg(test)]
-    mod tests {
-        #[test]
-        fn it_works() {
-            assert_eq!(2 + 2, 4);
-        }
     }
 }
