@@ -47,7 +47,7 @@ pub mod poker {
     pub fn evaluate(hand: &mut [Card; 5]) -> HandRank {
         // Used to check for a straight, but in the future may also be used to replace
         // the method used to check for pairs, two pair, etc.
-        let mut hand_by_card_rank_sequence: [i32; CARD_RANK_COUNT + 1] =
+        let mut hand_by_card_rank_sequence: [usize; CARD_RANK_COUNT + 1] =
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         // Used later to check for a flush
         let mut hand_by_suit: [i32; 4] = [0, 0, 0, 0];
@@ -89,11 +89,17 @@ pub mod poker {
             // Check for a straight
             let mut is_straight: bool = false;
             let mut consecutive_1_counter: i32 = 0;
-            for i in &hand_by_card_rank_sequence {
+            for (index, i) in hand_by_card_rank_sequence.iter_mut().enumerate() {
                 if *i == 1 {
                     consecutive_1_counter += 1;
                     if consecutive_1_counter == 5 {
                         is_straight = true;
+                        // Remove the unused LOW or HIGH ACE
+                        if index == 4 {
+                            hand_by_card_rank_sequence[CARD_RANK_COUNT] = 0;
+                        } else if index == CARD_RANK_COUNT {
+                            hand_by_card_rank_sequence[0] = 0;
+                        }
                         break;
                     }
                 } else {
@@ -115,7 +121,6 @@ pub mod poker {
             if is_straight_flush {
                 // Check for High Ace - King Sequence
                 if hand_by_card_rank_sequence[CARD_RANK_COUNT] == 1
-                    && hand_by_card_rank_sequence[CARD_RANK_COUNT - 1] == 1
                 {
                     return HandRank::RoyalFlush;
                 }
@@ -127,12 +132,17 @@ pub mod poker {
             }
 
             if is_flush {
+                // If there's no straight, remove the LOW Ace
+                hand_by_card_rank_sequence[0] = 0;
                 return HandRank::Flush;
             }
             return HandRank::Nothing;
         }
 
         if card_matches[0] >= 1 && (card_matches[1] == 0) {
+            // If there's no straight, remove the LOW Ace
+            hand_by_card_rank_sequence[0] = 0;
+
             // println!("matches 0 {}", card_matches[0]);
             match card_matches[0] {
                 1 => return HandRank::Pair,
