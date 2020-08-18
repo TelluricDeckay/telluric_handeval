@@ -34,12 +34,6 @@ pub mod poker {
             }
         }
     }
-    /*
-    fn main() {
-        let my_rank = HandRank::Pair;
-        println!("{}", my_rank.name());
-    }
-    */
 
     // Evalute for a poker hand.
     //
