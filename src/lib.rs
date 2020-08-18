@@ -22,7 +22,7 @@ pub mod poker {
             match self {
                 Self::Nothing => "Nothing",
                 Self::Pair => "Pair",
-                Self::TwoPair => "Two of a kind",
+                Self::TwoPair => "Two Pair",
                 Self::ThreeOfAKind => "Three of a kind",
                 Self::Straight => "Straight",
                 Self::Flush => "Flush",
@@ -345,8 +345,12 @@ mod tests {
     fn test_multiple_ranks() {
         let mut deck = Card::get_deck();
         let mut pairs = 0;
+        let mut two_pairs = 0;
         let mut three_of_a_kinds = 0;
         let mut straights = 0;
+        let mut flush = 0;
+        let mut full_house = 0;
+        let mut four_of_a_kind = 0;
         let mut straight_flushes = 0;
         let mut royal_flushes = 0;
 
@@ -358,17 +362,25 @@ mod tests {
 
             match evaluate(&mut hand_arr).0 {
                 HandRank::Pair => pairs += 1,
+                HandRank::TwoPair => two_pairs += 1,
                 HandRank::ThreeOfAKind => three_of_a_kinds += 1,
                 HandRank::Straight => straights += 1,
+                HandRank::Flush => flush += 1,
+                HandRank::FullHouse => full_house += 1,
+                HandRank::FourOfAKind => four_of_a_kind += 1,
                 HandRank::StraightFlush => straight_flushes += 1,
                 HandRank::RoyalFlush => royal_flushes += 1,
                 _ => (),
             }
         }
         println!("Out of {} hands dealt...\n", hands_dealt);
-        println!("Pairs = {}", pairs);
+        println!("{} = {}", HandRank::Pair.name(), pairs);
+        println!("{} = {}", HandRank::TwoPair.name(), two_pairs);
         println!("{} = {}", HandRank::ThreeOfAKind.name(), three_of_a_kinds);
-        println!("Straights = {}", straights);
+        println!("{} = {}", HandRank::Straight.name(), straights);
+        println!("{} = {}", HandRank::Flush.name(), flush);
+        println!("{} = {}", HandRank::FullHouse.name(), full_house);
+        println!("{} = {}", HandRank::FourOfAKind.name(), four_of_a_kind);
         println!("{} = {}", HandRank::StraightFlush.name(), straight_flushes);
         println!("{} = {}", HandRank::RoyalFlush.name(), royal_flushes);
     }
