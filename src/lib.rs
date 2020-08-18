@@ -38,7 +38,7 @@ pub mod poker {
     // Evalute for a poker hand.
     //
     // At some point this function may get split into smaller ones.
-    pub fn evaluate(hand: &mut [Card; 5]) -> HandRank {
+    pub fn evaluate(hand: &mut [Card; 5]) -> (HandRank, [usize; CARD_RANK_COUNT + 1]) {
         // Used to check for a straight, but in the future may also be used to replace
         // the method used to check for pairs, two pair, etc.
         let mut hand_by_card_rank_sequence: [usize; CARD_RANK_COUNT + 1] =
@@ -114,23 +114,22 @@ pub mod poker {
 
             if is_straight_flush {
                 // Check for High Ace - King Sequence
-                if hand_by_card_rank_sequence[CARD_RANK_COUNT] == 1
-                {
-                    return HandRank::RoyalFlush;
+                if hand_by_card_rank_sequence[CARD_RANK_COUNT] == 1 {
+                    return (HandRank::RoyalFlush, hand_by_card_rank_sequence);
                 }
-                return HandRank::StraightFlush;
+                return (HandRank::StraightFlush, hand_by_card_rank_sequence);
             }
 
             if is_straight {
-                return HandRank::Straight;
+                return (HandRank::Straight, hand_by_card_rank_sequence);
             }
 
             if is_flush {
                 // If there's no straight, remove the LOW Ace
                 hand_by_card_rank_sequence[0] = 0;
-                return HandRank::Flush;
+                return (HandRank::Flush, hand_by_card_rank_sequence);
             }
-            return HandRank::Nothing;
+            return (HandRank::Nothing, hand_by_card_rank_sequence);
         }
 
         if card_matches[0] >= 1 && (card_matches[1] == 0) {
@@ -139,30 +138,25 @@ pub mod poker {
 
             // println!("matches 0 {}", card_matches[0]);
             match card_matches[0] {
-                1 => return HandRank::Pair,
-                2 => return HandRank::ThreeOfAKind,
-                3 => return HandRank::FourOfAKind,
+                1 => return (HandRank::Pair, hand_by_card_rank_sequence),
+                2 => return (HandRank::ThreeOfAKind, hand_by_card_rank_sequence),
+                3 => return (HandRank::FourOfAKind, hand_by_card_rank_sequence),
                 // Error handling: see https://github.com/theimpossibleastronaut/rmwrs/blob/fabcf801a65a7d86a380573cf60ef7dff6d85511/src/lib.rs#L139
-                _ => return HandRank::InvalidHand,
+                _ => return (HandRank::InvalidHand, hand_by_card_rank_sequence),
             }
         }
 
         // Check for two pair or full house
         if card_matches[0] == card_matches[1] {
-            return HandRank::TwoPair;
+            return (HandRank::TwoPair, hand_by_card_rank_sequence);
         }
 
-        HandRank::FullHouse
+        (HandRank::FullHouse, hand_by_card_rank_sequence)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-
     use crate::poker::{evaluate, HandRank};
     use ionic_deckhandler::{Card, Deck, Rank, Suit};
 
@@ -175,7 +169,7 @@ mod tests {
             Card::new(Rank::King, Suit::Clubs),
             Card::new(Rank::Queen, Suit::Clubs),
         ];
-        assert_eq!(evaluate(&mut hand_arr), HandRank::Pair);
+        assert_eq!(evaluate(&mut hand_arr).0, HandRank::Pair);
     }
 
     #[test]
@@ -187,7 +181,7 @@ mod tests {
             Card::new(Rank::King, Suit::Clubs),
             Card::new(Rank::Queen, Suit::Clubs),
         ];
-        assert_eq!(evaluate(&mut hand_arr), HandRank::TwoPair);
+        assert_eq!(evaluate(&mut hand_arr).0, HandRank::TwoPair);
     }
 
     #[test]
@@ -199,7 +193,7 @@ mod tests {
             Card::new(Rank::King, Suit::Clubs),
             Card::new(Rank::Four, Suit::Clubs),
         ];
-        assert_eq!(evaluate(&mut hand_arr), HandRank::ThreeOfAKind);
+        assert_eq!(evaluate(&mut hand_arr).0, HandRank::ThreeOfAKind);
     }
 
     #[test]
@@ -212,7 +206,7 @@ mod tests {
             Card::new(Rank::Jack, Suit::Clubs),
             Card::new(Rank::Ace, Suit::Clubs),
         ];
-        assert_eq!(evaluate(&mut hand_arr), HandRank::Straight);
+        assert_eq!(evaluate(&mut hand_arr).0, HandRank::Straight);
 
         // Test for Ace-low straight
         hand_arr = [
@@ -222,7 +216,7 @@ mod tests {
             Card::new(Rank::Four, Suit::Clubs),
             Card::new(Rank::Ace, Suit::Clubs),
         ];
-        assert_eq!(evaluate(&mut hand_arr), HandRank::Straight);
+        assert_eq!(evaluate(&mut hand_arr).0, HandRank::Straight);
 
         // Test for Ten-high straight
         hand_arr = [
@@ -232,7 +226,7 @@ mod tests {
             Card::new(Rank::Seven, Suit::Clubs),
             Card::new(Rank::Nine, Suit::Clubs),
         ];
-        assert_eq!(evaluate(&mut hand_arr), HandRank::Straight);
+        assert_eq!(evaluate(&mut hand_arr).0, HandRank::Straight);
     }
 
     #[test]
@@ -244,7 +238,7 @@ mod tests {
             Card::new(Rank::King, Suit::Clubs),
             Card::new(Rank::Three, Suit::Clubs),
         ];
-        assert_eq!(evaluate(&mut hand_arr), HandRank::Flush);
+        assert_eq!(evaluate(&mut hand_arr).0, HandRank::Flush);
 
         hand_arr = [
             Card::new(Rank::Queen, Suit::Hearts),
@@ -253,7 +247,7 @@ mod tests {
             Card::new(Rank::King, Suit::Hearts),
             Card::new(Rank::Three, Suit::Hearts),
         ];
-        assert_eq!(evaluate(&mut hand_arr), HandRank::Flush);
+        assert_eq!(evaluate(&mut hand_arr).0, HandRank::Flush);
     }
 
     #[test]
@@ -265,7 +259,7 @@ mod tests {
             Card::new(Rank::Queen, Suit::Spades),
             Card::new(Rank::Four, Suit::Clubs),
         ];
-        assert_eq!(evaluate(&mut hand_arr), HandRank::FullHouse);
+        assert_eq!(evaluate(&mut hand_arr).0, HandRank::FullHouse);
     }
 
     #[test]
@@ -277,7 +271,7 @@ mod tests {
             Card::new(Rank::Four, Suit::Spades),
             Card::new(Rank::Four, Suit::Clubs),
         ];
-        assert_eq!(evaluate(&mut hand_arr), HandRank::FourOfAKind);
+        assert_eq!(evaluate(&mut hand_arr).0, HandRank::FourOfAKind);
     }
 
     #[test]
@@ -289,7 +283,7 @@ mod tests {
             Card::new(Rank::King, Suit::Spades),
             Card::new(Rank::Ten, Suit::Clubs),
         ];
-        assert_eq!(evaluate(&mut hand_arr), HandRank::Nothing);
+        assert_eq!(evaluate(&mut hand_arr).0, HandRank::Nothing);
 
         // Almost a straight, but still nothing
         hand_arr = [
@@ -299,7 +293,7 @@ mod tests {
             Card::new(Rank::Seven, Suit::Clubs),
             Card::new(Rank::Nine, Suit::Clubs),
         ];
-        assert!(evaluate(&mut hand_arr) == HandRank::Nothing);
+        assert!(evaluate(&mut hand_arr).0 == HandRank::Nothing);
     }
 
     #[test]
@@ -311,7 +305,7 @@ mod tests {
             Card::new(Rank::Ten, Suit::Clubs),
             Card::new(Rank::Jack, Suit::Clubs),
         ];
-        assert_eq!(evaluate(&mut hand_arr), HandRank::StraightFlush);
+        assert_eq!(evaluate(&mut hand_arr).0, HandRank::StraightFlush);
 
         // Test for Ace-low Straight Flush
         hand_arr = [
@@ -321,7 +315,7 @@ mod tests {
             Card::new(Rank::Ace, Suit::Hearts),
             Card::new(Rank::Four, Suit::Hearts),
         ];
-        assert_eq!(evaluate(&mut hand_arr), HandRank::StraightFlush);
+        assert_eq!(evaluate(&mut hand_arr).0, HandRank::StraightFlush);
 
         // Test for Royal Flush (Ace-high straight flush)
         hand_arr = [
@@ -331,7 +325,7 @@ mod tests {
             Card::new(Rank::Ace, Suit::Hearts),
             Card::new(Rank::King, Suit::Hearts),
         ];
-        assert_eq!(evaluate(&mut hand_arr), HandRank::RoyalFlush);
+        assert_eq!(evaluate(&mut hand_arr).0, HandRank::RoyalFlush);
     }
 
     #[test]
@@ -343,7 +337,7 @@ mod tests {
             Card::new(Rank::Queen, Suit::Spades),
             Card::new(Rank::Queen, Suit::Clubs),
         ];
-        assert_eq!(evaluate(&mut hand_arr), HandRank::InvalidHand);
+        assert_eq!(evaluate(&mut hand_arr).0, HandRank::InvalidHand);
     }
 
     #[test]
@@ -362,7 +356,7 @@ mod tests {
             deck.shuffle_deck();
             let mut hand_arr: [Card; 5] = [deck[0], deck[1], deck[2], deck[3], deck[4]];
 
-            match evaluate(&mut hand_arr) {
+            match evaluate(&mut hand_arr).0 {
                 HandRank::Pair => pairs += 1,
                 HandRank::ThreeOfAKind => three_of_a_kinds += 1,
                 HandRank::Straight => straights += 1,
