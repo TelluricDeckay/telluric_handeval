@@ -153,11 +153,33 @@ pub mod poker {
 
         (HandRank::FullHouse, hand_by_card_rank_sequence)
     }
+
+    pub fn compare(hand_rank: HandRank, hands: Vec<[usize; CARD_RANK_COUNT + 1]>) -> usize {
+        let mut highest_pos = 0;
+        let mut highest_hand = 0;
+
+        match hand_rank {
+            HandRank::FullHouse => {
+                for i in 0..hands.len() {
+                    for j in 0..hands[i].len() {
+                        if hands[i][j] == 3 {
+                            if j > highest_pos {
+                                highest_pos = j;
+                                highest_hand = i;
+                            }
+                        }
+                    }
+                }
+            }
+            _ => (),
+        }
+        highest_hand
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::poker::{evaluate, HandRank};
+    use crate::poker::{compare, evaluate, HandRank};
     use ionic_deckhandler::{Card, Deck, Rank, Suit};
 
     #[test]
@@ -383,5 +405,44 @@ mod tests {
         println!("{} = {}", HandRank::FourOfAKind.name(), four_of_a_kind);
         println!("{} = {}", HandRank::StraightFlush.name(), straight_flushes);
         println!("{} = {}", HandRank::RoyalFlush.name(), royal_flushes);
+    }
+
+    #[test]
+    fn test_compare_full_house() {
+        let mut hand_arr_0: [Card; 5] = [
+            Card::new(Rank::Queen, Suit::Clubs),
+            Card::new(Rank::Four, Suit::Hearts),
+            Card::new(Rank::Four, Suit::Diamonds),
+            Card::new(Rank::Queen, Suit::Spades),
+            Card::new(Rank::Four, Suit::Clubs),
+        ];
+
+        let mut hand_arr_1: [Card; 5] = [
+            Card::new(Rank::Queen, Suit::Clubs),
+            Card::new(Rank::Ace, Suit::Hearts),
+            Card::new(Rank::Ace, Suit::Diamonds),
+            Card::new(Rank::Queen, Suit::Spades),
+            Card::new(Rank::Ace, Suit::Clubs),
+        ];
+
+        let mut hand_arr_2: [Card; 5] = [
+            Card::new(Rank::Queen, Suit::Clubs),
+            Card::new(Rank::Jack, Suit::Hearts),
+            Card::new(Rank::Jack, Suit::Diamonds),
+            Card::new(Rank::Queen, Suit::Spades),
+            Card::new(Rank::Jack, Suit::Clubs),
+        ];
+
+        assert_eq!(
+            compare(
+                HandRank::FullHouse,
+                vec![
+                    evaluate(&mut hand_arr_0).1,
+                    evaluate(&mut hand_arr_1).1,
+                    evaluate(&mut hand_arr_2).1
+                ]
+            ),
+            1
+        );
     }
 }
