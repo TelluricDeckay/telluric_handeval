@@ -159,7 +159,7 @@ pub mod poker {
         let mut highest_hand = 0;
 
         match hand_rank {
-            HandRank::FullHouse => {
+            HandRank::FullHouse | HandRank::ThreeOfAKind => {
                 for i in 0..hands.len() {
                     for j in 0..hands[i].len() {
                         if hands[i][j] == 3 {
@@ -204,18 +204,6 @@ mod tests {
             Card::new(Rank::Queen, Suit::Clubs),
         ];
         assert_eq!(evaluate(&mut hand_arr).0, HandRank::TwoPair);
-    }
-
-    #[test]
-    fn test_evaluate_three_of_a_kind() {
-        let mut hand_arr: [Card; 5] = [
-            Card::new(Rank::Queen, Suit::Clubs),
-            Card::new(Rank::Four, Suit::Hearts),
-            Card::new(Rank::Four, Suit::Diamonds),
-            Card::new(Rank::King, Suit::Clubs),
-            Card::new(Rank::Four, Suit::Clubs),
-        ];
-        assert_eq!(evaluate(&mut hand_arr).0, HandRank::ThreeOfAKind);
     }
 
     #[test]
