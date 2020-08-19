@@ -1,5 +1,4 @@
 pub mod poker {
-
     use ionic_deckhandler::{Card, Rank, CARD_RANK_COUNT};
 
     #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -154,18 +153,37 @@ pub mod poker {
         (HandRank::FullHouse, hand_by_card_rank_sequence)
     }
 
-    pub fn compare(hand_rank: HandRank, hands: Vec<[usize; CARD_RANK_COUNT + 1]>) -> usize {
+    pub fn compare(hand_rank: HandRank, hands: Vec<[usize; CARD_RANK_COUNT + 1]>) -> Vec<usize> {
         let mut highest_pos = 0;
-        let mut highest_hand = 0;
+        // let mut highest_hand = 0;
+        let mut hand_vec: Vec<usize> = Vec::new();
 
         match hand_rank {
+            HandRank::Pair => {
+                for i in 0..hands.len() {
+                    for j in 0..hands[i].len() {
+                        if hands[i][j] == 2 {
+                            if j > highest_pos {
+                                highest_pos = j;
+                                // highest_hand = i;
+                            }
+
+                        }
+                    }
+                }
+            }
             HandRank::FullHouse | HandRank::ThreeOfAKind => {
                 for i in 0..hands.len() {
                     for j in 0..hands[i].len() {
                         if hands[i][j] == 3 {
+                            // This won't work because highest_pos is initialized to 0
                             if j > highest_pos {
-                                highest_pos = j;
-                                highest_hand = i;
+                                highest_pos = j ;
+                                if hand_vec.len() != 0 {
+                                    hand_vec.pop();
+                                }
+                                hand_vec.push(i);
+                                println!("'{}'", hand_vec[0]);
                             }
                         }
                     }
@@ -173,7 +191,9 @@ pub mod poker {
             }
             _ => (),
         }
-        highest_hand
+        println!("'{}'", hand_vec.len());
+        println!("'{}'", hand_vec[0]);
+        hand_vec
     }
 }
 
