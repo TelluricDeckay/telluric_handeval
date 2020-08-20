@@ -196,6 +196,39 @@ pub mod poker {
                     }
                 }
             }
+            HandRank::TwoPair => {
+                for i in 0..CARD_RANK_COUNT + 1 {
+                    if copy_1[i] == 2 || copy_2[i] == 2 {
+                        if copy_1[i] > copy_2[i] {
+                            return Comparison::GreaterThan;
+                        } else if copy_1[i] < copy_2[i] {
+                            return Comparison::LessThan;
+                        } else {
+                            // The first pair is is equal, look for second pair card outside the pairs
+                            for j in i + 1..CARD_RANK_COUNT + 1 {
+                                if copy_1[j] == 2 || copy_2[j] == 2 {
+                                    if copy_1[j] > copy_2[j] {
+                                        return Comparison::GreaterThan;
+                                    } else if copy_1[j] < copy_2[j] {
+                                        return Comparison::LessThan;
+                                    } else {
+                                        for k in 0..CARD_RANK_COUNT + 1 {
+                                            if copy_1[k] == 1 || copy_2[k] == 1 {
+                                                if copy_1[k] > copy_2[k] {
+                                                    return Comparison::GreaterThan;
+                                                } else if copy_1[k] < copy_2[k] {
+                                                    return Comparison::LessThan;
+                                                }
+                                            }
+                                        }
+                                        return Comparison::Equal;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             HandRank::FullHouse | HandRank::ThreeOfAKind | HandRank::FourOfAKind => {
                 for i in 0..CARD_RANK_COUNT + 1 {
                     println!("{},{}", copy_1[i], copy_2[i]);
@@ -220,30 +253,6 @@ pub mod poker {
 mod tests {
     use crate::poker::{evaluate, HandRank};
     use ionic_deckhandler::{Card, Deck, Rank, Suit};
-
-    #[test]
-    fn test_evaluate_pair() {
-        let mut hand_arr: [Card; 5] = [
-            Card::new(Rank::Ace, Suit::Clubs),
-            Card::new(Rank::Three, Suit::Hearts),
-            Card::new(Rank::Three, Suit::Diamonds),
-            Card::new(Rank::King, Suit::Clubs),
-            Card::new(Rank::Queen, Suit::Clubs),
-        ];
-        assert_eq!(evaluate(&mut hand_arr).0, HandRank::Pair);
-    }
-
-    #[test]
-    fn test_evaluate_two_pair() {
-        let mut hand_arr: [Card; 5] = [
-            Card::new(Rank::Queen, Suit::Clubs),
-            Card::new(Rank::Three, Suit::Hearts),
-            Card::new(Rank::Three, Suit::Diamonds),
-            Card::new(Rank::King, Suit::Clubs),
-            Card::new(Rank::Queen, Suit::Clubs),
-        ];
-        assert_eq!(evaluate(&mut hand_arr).0, HandRank::TwoPair);
-    }
 
     #[test]
     fn test_evaluate_straight() {
