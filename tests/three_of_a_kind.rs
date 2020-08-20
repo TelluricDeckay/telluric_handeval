@@ -1,5 +1,5 @@
 use ionic_deckhandler::{Card, Rank, Suit};
-use telluric_handeval::poker::{compare, evaluate, HandRank};
+use telluric_handeval::poker::{compare, evaluate, Comparison, HandRank};
 
 #[test]
 fn test_evaluate_three_of_a_kind() {
@@ -18,9 +18,9 @@ fn test_compare_three_of_a_kind() {
     let mut hand_arr_0: [Card; 5] = [
         Card::new(Rank::Queen, Suit::Clubs),
         Card::new(Rank::Four, Suit::Hearts),
-        Card::new(Rank::Two, Suit::Diamonds),
-        Card::new(Rank::Queen, Suit::Spades),
-        Card::new(Rank::Eight, Suit::Clubs),
+        Card::new(Rank::Four, Suit::Diamonds),
+        Card::new(Rank::Ten, Suit::Spades),
+        Card::new(Rank::Four, Suit::Clubs),
     ];
 
     let mut hand_arr_1: [Card; 5] = [
@@ -42,12 +42,9 @@ fn test_compare_three_of_a_kind() {
     assert_eq!(
         compare(
             HandRank::ThreeOfAKind,
-            vec![
-                evaluate(&mut hand_arr_0).1,
-                evaluate(&mut hand_arr_1).1,
-                evaluate(&mut hand_arr_2).1
-            ]
+            evaluate(&mut hand_arr_0).1,
+            evaluate(&mut hand_arr_1).1
         ),
-        vec![1]
+        Comparison::LessThan
     );
 }

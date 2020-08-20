@@ -153,47 +153,66 @@ pub mod poker {
         (HandRank::FullHouse, hand_by_card_rank_sequence)
     }
 
-    pub fn compare(hand_rank: HandRank, hands: Vec<[usize; CARD_RANK_COUNT + 1]>) -> Vec<usize> {
-        let mut highest_pos = 0;
-        // let mut highest_hand = 0;
-        let mut hand_vec: Vec<usize> = Vec::new();
+    #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+    pub enum Comparison {
+        GreaterThan,
+        LessThan,
+        Equal,
+    }
+
+    /// Given two hands, is the left parameter greater than the right
+    pub fn compare(
+        hand_rank: HandRank,
+        hand_1: [usize; CARD_RANK_COUNT + 1],
+        hand_2: [usize; CARD_RANK_COUNT + 1],
+    ) -> Comparison {
+        let mut copy_1 = hand_1;
+        copy_1.reverse();
+
+        let mut copy_2 = hand_2;
+        copy_2.reverse();
 
         match hand_rank {
             HandRank::Pair => {
-                for i in 0..hands.len() {
-                    for j in 0..hands[i].len() {
-                        if hands[i][j] == 2 {
-                            if j > highest_pos {
-                                highest_pos = j;
-                                // highest_hand = i;
+                for i in 0..CARD_RANK_COUNT + 1 {
+                    if copy_1[i] == 2 || copy_2[i] >= 2 {
+                        if copy_1[i] > copy_2[i] {
+                            return Comparison::GreaterThan;
+                        } else if copy_1[i] < copy_2[i] {
+                            return Comparison::LessThan;
+                        } else {
+                            // Pairs are equal, look for highest card outside the pairs
+                            for j in 0..CARD_RANK_COUNT + 1 {
+                                if copy_1[j] == 1 || copy_2[j] == 1 {
+                                    if copy_1[j] > copy_2[j] {
+                                        return Comparison::GreaterThan;
+                                    } else if copy_1[j] < copy_2[j] {
+                                        return Comparison::LessThan;
+                                    }
+                                }
                             }
-
+                            return Comparison::Equal;
                         }
                     }
                 }
             }
-            HandRank::FullHouse | HandRank::ThreeOfAKind => {
-                for i in 0..hands.len() {
-                    for j in 0..hands[i].len() {
-                        if hands[i][j] == 3 {
-                            // This won't work because highest_pos is initialized to 0
-                            if j > highest_pos {
-                                highest_pos = j ;
-                                if hand_vec.len() != 0 {
-                                    hand_vec.pop();
-                                }
-                                hand_vec.push(i);
-                                println!("'{}'", hand_vec[0]);
-                            }
+            HandRank::FullHouse | HandRank::ThreeOfAKind | HandRank::FourOfAKind => {
+                for i in 0..CARD_RANK_COUNT + 1 {
+                    println!("{},{}", copy_1[i], copy_2[i]);
+                    if copy_1[i] >= 3 || copy_2[i] >= 3 {
+                        if copy_1[i] > copy_2[i] {
+                            return Comparison::GreaterThan;
+                        } else if copy_1[i] < copy_2[i] {
+                            return Comparison::LessThan;
+                        } else {
+                            return Comparison::Equal;
                         }
                     }
                 }
             }
             _ => (),
         }
-        println!("'{}'", hand_vec.len());
-        println!("'{}'", hand_vec[0]);
-        hand_vec
+        Comparison::Equal
     }
 }
 

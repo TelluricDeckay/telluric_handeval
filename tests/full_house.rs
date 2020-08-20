@@ -1,5 +1,5 @@
 use ionic_deckhandler::{Card, Rank, Suit};
-use telluric_handeval::poker::{compare, evaluate, HandRank};
+use telluric_handeval::poker::{compare, evaluate, Comparison, HandRank};
 
 #[test]
 fn test_evaluate_full_house() {
@@ -42,12 +42,9 @@ fn test_compare_full_house() {
     assert_eq!(
         compare(
             HandRank::FullHouse,
-            vec![
-                evaluate(&mut hand_arr_0).1,
-                evaluate(&mut hand_arr_1).1,
-                evaluate(&mut hand_arr_2).1
-            ]
+            evaluate(&mut hand_arr_0).1,
+            evaluate(&mut hand_arr_1).1
         ),
-        vec![1]
+        Comparison::LessThan
     );
 }
