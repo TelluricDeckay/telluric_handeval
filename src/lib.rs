@@ -1,3 +1,5 @@
+mod hand;
+
 pub mod poker {
 
     use ionic_deckhandler::{Card, Deck, Rank, Suit, CARD_RANK_COUNT};
