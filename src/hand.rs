@@ -2,7 +2,7 @@ use ionic_deckhandler::{Card, Rank};
 use std::cmp::Ordering;
 use std::convert::TryInto;
 
-#[derive(PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum HandRank {
     RoyalFlush,
     StraightFlush {
@@ -38,6 +38,7 @@ pub enum HandRank {
     Highest {
         ranks: [Rank; 5],
     },
+    Invalid,
 }
 
 impl HandRank {
@@ -53,13 +54,15 @@ impl HandRank {
             HandRank::TwoPair { .. } => 3,
             HandRank::Pair { .. } => 2,
             HandRank::Highest { .. } => 1,
+            HandRank::Invalid { .. } => 0,
         }
     }
 }
 
 impl Ord for HandRank {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.partial_cmp(&other).expect("Error getting hand ordering.")
+        self.partial_cmp(&other)
+            .expect("Error getting hand ordering.")
     }
 }
 
@@ -257,6 +260,7 @@ impl PartialOrd for HandRank {
                     self.get_rank_u8().partial_cmp(&other.get_rank_u8())
                 }
             }
+            HandRank::Invalid => Some(Ordering::Less),
         }
     }
 }
@@ -268,11 +272,11 @@ struct RankCount {
 }
 
 pub trait PokerRankedHand {
-    fn get_hand_kind(&self) -> HandRank;
+    fn evaluate_hand(&self) -> HandRank;
 }
 
 impl PokerRankedHand for [Card; 5] {
-    fn get_hand_kind(&self) -> HandRank {
+    fn evaluate_hand(&self) -> HandRank {
         // Algorithm source: https://nsayer.blogspot.com/2007/07/algorithm-for-evaluating-poker-hands.html
         let mut cards = self.clone();
         // Sort cards by rank descending. Useful for straights and highest.
@@ -384,7 +388,7 @@ impl PokerRankedHand for [Card; 5] {
                     // a royal flush, the last card will be an Ace, so will fail the standard "straight" test.
                     let mut is_four_straight = true;
                     for i in 1..4 {
-                        if cards[i].get_rank() as u8 - cards[i - 1].get_rank() as u8 != 1 {
+                        if cards[i - 1].get_rank() as u8 - cards[i].get_rank() as u8 != 1 {
                             is_four_straight = false;
                             break;
                         }
@@ -392,12 +396,18 @@ impl PokerRankedHand for [Card; 5] {
                     is_four_straight
                 } {
                     if cards[4].get_rank() == Rank::Ace && cards[0].get_rank() == Rank::King {
-                        HandRank::RoyalFlush
-                    } else if cards[4].get_rank() as u8 - cards[3].get_rank() as u8 != 1 {
+                        if is_flush {
+                            HandRank::RoyalFlush
+                        } else {
+                            // Use the Ace as the highest rank, because then we know it's a Royal straight.
+                            HandRank::Straight {
+                                highest_rank: cards[4].get_rank(),
+                            }
+                        }
+                    } else if cards[3].get_rank() as u8 - cards[4].get_rank() as u8 == 1 {
                         if is_flush {
                             HandRank::StraightFlush {
-                                // Use the Ace as the highest rank, because then we know it's a Royal straight.
-                                highest_rank: cards[4].get_rank(),
+                                highest_rank: cards[0].get_rank(),
                             }
                         } else {
                             HandRank::Straight {
@@ -425,7 +435,270 @@ impl PokerRankedHand for [Card; 5] {
                     }
                 }
             }
-            _ => panic!("Invalid hand."),
+            _ => HandRank::Invalid,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    // Tests are all Andy5995's. I just copy-pasted + modified to work with new api.
+    use crate::hand::{HandRank, PokerRankedHand};
+    use ionic_deckhandler::{Card, Rank, Suit};
+
+    #[test]
+    fn test_evaluate_pair() {
+        let hand_arr: [Card; 5] = [
+            Card::new(Rank::Ace, Suit::Clubs),
+            Card::new(Rank::Three, Suit::Hearts),
+            Card::new(Rank::Three, Suit::Diamonds),
+            Card::new(Rank::King, Suit::Clubs),
+            Card::new(Rank::Queen, Suit::Clubs),
+        ];
+        assert_eq!(
+            hand_arr.evaluate_hand(),
+            HandRank::Pair {
+                pair_rank: Rank::Three,
+                other_ranks: [Rank::King, Rank::Queen, Rank::Ace]
+            }
+        );
+    }
+
+    #[test]
+    fn test_evaluate_two_pair() {
+        let hand_arr: [Card; 5] = [
+            Card::new(Rank::Queen, Suit::Clubs),
+            Card::new(Rank::Three, Suit::Hearts),
+            Card::new(Rank::Three, Suit::Diamonds),
+            Card::new(Rank::King, Suit::Clubs),
+            Card::new(Rank::Queen, Suit::Clubs),
+        ];
+        assert_eq!(
+            hand_arr.evaluate_hand(),
+            HandRank::TwoPair {
+                higher_pair_rank: Rank::Queen,
+                lower_pair_rank: Rank::Three,
+                kicker_rank: Rank::King,
+            }
+        );
+    }
+
+    #[test]
+    fn test_evaluate_three_of_a_kind() {
+        let hand_arr: [Card; 5] = [
+            Card::new(Rank::Queen, Suit::Clubs),
+            Card::new(Rank::Four, Suit::Hearts),
+            Card::new(Rank::Four, Suit::Diamonds),
+            Card::new(Rank::King, Suit::Clubs),
+            Card::new(Rank::Four, Suit::Clubs),
+        ];
+        assert_eq!(
+            hand_arr.evaluate_hand(),
+            HandRank::ThreeOfAkind {
+                kind_rank: Rank::Four,
+                other_ranks: [Rank::King, Rank::Queen]
+            }
+        );
+    }
+
+    #[test]
+    fn test_evaluate_straight() {
+        // Test for Ace-high straight
+        let hand_arr: [Card; 5] = [
+            Card::new(Rank::Queen, Suit::Clubs),
+            Card::new(Rank::King, Suit::Hearts),
+            Card::new(Rank::Ten, Suit::Diamonds),
+            Card::new(Rank::Jack, Suit::Clubs),
+            Card::new(Rank::Ace, Suit::Clubs),
+        ];
+        assert_eq!(
+            hand_arr.evaluate_hand(),
+            HandRank::Straight {
+                highest_rank: Rank::Ace
+            }
+        );
+
+        // Test for Ace-low straight
+        let hand_arr = [
+            Card::new(Rank::Three, Suit::Clubs),
+            Card::new(Rank::Five, Suit::Hearts),
+            Card::new(Rank::Two, Suit::Diamonds),
+            Card::new(Rank::Four, Suit::Clubs),
+            Card::new(Rank::Ace, Suit::Clubs),
+        ];
+        assert_eq!(
+            hand_arr.evaluate_hand(),
+            HandRank::Straight {
+                highest_rank: Rank::Five
+            }
+        );
+
+        // Test for Ten-high straight
+        let hand_arr = [
+            Card::new(Rank::Ten, Suit::Clubs),
+            Card::new(Rank::Six, Suit::Hearts),
+            Card::new(Rank::Eight, Suit::Diamonds),
+            Card::new(Rank::Seven, Suit::Clubs),
+            Card::new(Rank::Nine, Suit::Clubs),
+        ];
+        assert_eq!(
+            hand_arr.evaluate_hand(),
+            HandRank::Straight {
+                highest_rank: Rank::Ten
+            }
+        );
+    }
+
+    #[test]
+    fn test_evaluate_flush() {
+        let hand_arr: [Card; 5] = [
+            Card::new(Rank::Queen, Suit::Clubs),
+            Card::new(Rank::Five, Suit::Clubs),
+            Card::new(Rank::Four, Suit::Clubs),
+            Card::new(Rank::King, Suit::Clubs),
+            Card::new(Rank::Three, Suit::Clubs),
+        ];
+        assert_eq!(
+            hand_arr.evaluate_hand(),
+            HandRank::Flush {
+                ranks: [Rank::King, Rank::Queen, Rank::Five, Rank::Four, Rank::Three]
+            }
+        );
+
+        let hand_arr = [
+            Card::new(Rank::Queen, Suit::Hearts),
+            Card::new(Rank::Five, Suit::Hearts),
+            Card::new(Rank::Four, Suit::Hearts),
+            Card::new(Rank::King, Suit::Hearts),
+            Card::new(Rank::Ace, Suit::Hearts),
+        ];
+        assert_eq!(
+            hand_arr.evaluate_hand(),
+            HandRank::Flush {
+                ranks: [Rank::King, Rank::Queen, Rank::Five, Rank::Four, Rank::Ace]
+            }
+        );
+    }
+
+    #[test]
+    fn test_evaluate_full_house() {
+        let hand_arr: [Card; 5] = [
+            Card::new(Rank::Queen, Suit::Clubs),
+            Card::new(Rank::Four, Suit::Hearts),
+            Card::new(Rank::Four, Suit::Diamonds),
+            Card::new(Rank::Queen, Suit::Spades),
+            Card::new(Rank::Four, Suit::Clubs),
+        ];
+        assert_eq!(
+            hand_arr.evaluate_hand(),
+            HandRank::FullHouse {
+                three_kind_rank: Rank::Four,
+                pair_rank: Rank::Queen
+            }
+        );
+    }
+
+    #[test]
+    fn test_evaluate_four_of_a_kind() {
+        let hand_arr: [Card; 5] = [
+            Card::new(Rank::Queen, Suit::Clubs),
+            Card::new(Rank::Four, Suit::Hearts),
+            Card::new(Rank::Four, Suit::Diamonds),
+            Card::new(Rank::Four, Suit::Spades),
+            Card::new(Rank::Four, Suit::Clubs),
+        ];
+        assert_eq!(
+            hand_arr.evaluate_hand(),
+            HandRank::FourOfAKind {
+                kind_rank: Rank::Four,
+                kicker_rank: Rank::Queen
+            }
+        );
+    }
+
+    #[test]
+    fn test_evaluate_nothing() {
+        let hand_arr: [Card; 5] = [
+            Card::new(Rank::Queen, Suit::Clubs),
+            Card::new(Rank::Five, Suit::Hearts),
+            Card::new(Rank::Eight, Suit::Diamonds),
+            Card::new(Rank::King, Suit::Spades),
+            Card::new(Rank::Ten, Suit::Clubs),
+        ];
+        assert_eq!(
+            hand_arr.evaluate_hand(),
+            HandRank::Highest {
+                ranks: [Rank::King, Rank::Queen, Rank::Ten, Rank::Eight, Rank::Five]
+            }
+        );
+
+        // Almost a straight, but still nothing
+        let hand_arr = [
+            Card::new(Rank::Ten, Suit::Clubs),
+            Card::new(Rank::Five, Suit::Hearts),
+            Card::new(Rank::Eight, Suit::Diamonds),
+            Card::new(Rank::Seven, Suit::Clubs),
+            Card::new(Rank::Nine, Suit::Clubs),
+        ];
+        assert_eq!(
+            hand_arr.evaluate_hand(),
+            HandRank::Highest {
+                ranks: [Rank::Ten, Rank::Nine, Rank::Eight, Rank::Seven, Rank::Five]
+            }
+        );
+    }
+
+    #[test]
+    fn test_evaluate_straight_flush() {
+        let hand_arr: [Card; 5] = [
+            Card::new(Rank::Queen, Suit::Clubs),
+            Card::new(Rank::King, Suit::Clubs),
+            Card::new(Rank::Nine, Suit::Clubs),
+            Card::new(Rank::Ten, Suit::Clubs),
+            Card::new(Rank::Jack, Suit::Clubs),
+        ];
+        assert_eq!(
+            hand_arr.evaluate_hand(),
+            HandRank::StraightFlush {
+                highest_rank: Rank::King
+            }
+        );
+
+        // Test for Ace-low Straight Flush
+        let hand_arr = [
+            Card::new(Rank::Five, Suit::Hearts),
+            Card::new(Rank::Three, Suit::Hearts),
+            Card::new(Rank::Two, Suit::Hearts),
+            Card::new(Rank::Ace, Suit::Hearts),
+            Card::new(Rank::Four, Suit::Hearts),
+        ];
+        assert_eq!(
+            hand_arr.evaluate_hand(),
+            HandRank::StraightFlush {
+                highest_rank: Rank::Five
+            }
+        );
+
+        // Test for Royal Flush (Ace-high straight flush)
+        let hand_arr = [
+            Card::new(Rank::Queen, Suit::Hearts),
+            Card::new(Rank::Ten, Suit::Hearts),
+            Card::new(Rank::Jack, Suit::Hearts),
+            Card::new(Rank::Ace, Suit::Hearts),
+            Card::new(Rank::King, Suit::Hearts),
+        ];
+        assert_eq!(hand_arr.evaluate_hand(), HandRank::RoyalFlush);
+    }
+
+    #[test]
+    fn test_evaluate_invalid_hand() {
+        let hand_arr: [Card; 5] = [
+            Card::new(Rank::Queen, Suit::Hearts),
+            Card::new(Rank::Queen, Suit::Diamonds),
+            Card::new(Rank::Queen, Suit::Clubs),
+            Card::new(Rank::Queen, Suit::Spades),
+            Card::new(Rank::Queen, Suit::Clubs),
+        ];
+        assert_eq!(hand_arr.evaluate_hand(), HandRank::Invalid);
     }
 }
