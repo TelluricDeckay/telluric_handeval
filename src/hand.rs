@@ -703,6 +703,8 @@ mod tests {
         assert_eq!(hand_arr.evaluate_hand(), HandRank::Invalid);
     }
 
+    // Comparator tests.
+    #[test]
     fn test_compare_straights() {
         let hand_arr1 = [
             Card::new(Rank::Queen, Suit::Hearts),
