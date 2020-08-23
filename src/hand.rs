@@ -445,6 +445,7 @@ mod tests {
     // Tests are all Andy5995's. I just copy-pasted + modified to work with new api.
     use crate::hand::{HandRank, PokerRankedHand};
     use ionic_deckhandler::{Card, Rank, Suit};
+    use std::cmp::Ordering;
 
     #[test]
     fn test_evaluate_pair() {
@@ -700,5 +701,62 @@ mod tests {
             Card::new(Rank::Queen, Suit::Clubs),
         ];
         assert_eq!(hand_arr.evaluate_hand(), HandRank::Invalid);
+    }
+
+    fn test_compare_straights() {
+        let hand_arr1 = [
+            Card::new(Rank::Queen, Suit::Hearts),
+            Card::new(Rank::Ten, Suit::Spades),
+            Card::new(Rank::Jack, Suit::Hearts),
+            Card::new(Rank::King, Suit::Hearts),
+            Card::new(Rank::Ace, Suit::Hearts),
+        ];
+
+        let hand_arr2 = [
+            Card::new(Rank::Queen, Suit::Diamonds),
+            Card::new(Rank::Jack, Suit::Hearts),
+            Card::new(Rank::Ten, Suit::Hearts),
+            Card::new(Rank::King, Suit::Hearts),
+            Card::new(Rank::Nine, Suit::Hearts),
+        ];
+
+        assert_eq!(
+            hand_arr1.evaluate_hand().cmp(&hand_arr2.evaluate_hand()),
+            Ordering::Greater
+        );
+
+        let hand_arr1 = [
+            Card::new(Rank::Queen, Suit::Hearts),
+            Card::new(Rank::Ten, Suit::Spades),
+            Card::new(Rank::Jack, Suit::Hearts),
+            Card::new(Rank::Eight, Suit::Hearts),
+            Card::new(Rank::Nine, Suit::Hearts),
+        ];
+
+        let hand_arr2 = [
+            Card::new(Rank::Queen, Suit::Diamonds),
+            Card::new(Rank::Jack, Suit::Hearts),
+            Card::new(Rank::Ten, Suit::Hearts),
+            Card::new(Rank::King, Suit::Hearts),
+            Card::new(Rank::Nine, Suit::Hearts),
+        ];
+
+        assert_eq!(
+            hand_arr1.evaluate_hand().cmp(&hand_arr2.evaluate_hand()),
+            Ordering::Less
+        );
+
+        let hand_arr3 = [
+            Card::new(Rank::Eight, Suit::Diamonds),
+            Card::new(Rank::Jack, Suit::Spades),
+            Card::new(Rank::Ten, Suit::Diamonds),
+            Card::new(Rank::Queen, Suit::Spades),
+            Card::new(Rank::Nine, Suit::Hearts),
+        ];
+
+        assert_eq!(
+            hand_arr1.evaluate_hand().cmp(&hand_arr3.evaluate_hand()),
+            Ordering::Equal
+        );
     }
 }
