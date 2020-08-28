@@ -58,29 +58,29 @@ pub mod poker {
                 HandRank::Invalid { .. } => 0,
             }
         }
-/* error[E0533]: expected unit struct, unit variant or constant, found struct variant `Self::Pair`
-  --> src/lib.rs:64:17
-   |
-64 |                 Self::Pair => "Pair",
-   |                 ^^^^^^^^^^
+        /* error[E0533]: expected unit struct, unit variant or constant, found struct variant `Self::Pair`
+          --> src/lib.rs:64:17
+           |
+        64 |                 Self::Pair => "Pair",
+           |                 ^^^^^^^^^^
 
-error[E0533]: expected unit struct, unit variant or constant, found struct variant `Self::TwoPair`
-  --> src/lib.rs:65:17
+        error[E0533]: expected unit struct, unit variant or constant, found struct variant `Self::TwoPair`
+          --> src/lib.rs:65:17
 
-        pub fn stringify(&self) -> &'static str {
-            match self {
-                Self::Pair => "Pair",
-                Self::TwoPair => "Two Pair",
-                Self::ThreeOfAKind => "Three of a kind",
-                Self::Straight => "Straight",
-                Self::Flush => "Flush",
-                Self::FullHouse => "Full House",
-                Self::FourOfAKind => "Four of a kind",
-                Self::StraightFlush => "Straight Flush",
-                Self::RoyalFlush => "Royal Flush",
-                Self::Invalid => "InvalidHand",
-            }
-        } */
+                pub fn stringify(&self) -> &'static str {
+                    match self {
+                        Self::Pair => "Pair",
+                        Self::TwoPair => "Two Pair",
+                        Self::ThreeOfAKind => "Three of a kind",
+                        Self::Straight => "Straight",
+                        Self::Flush => "Flush",
+                        Self::FullHouse => "Full House",
+                        Self::FourOfAKind => "Four of a kind",
+                        Self::StraightFlush => "Straight Flush",
+                        Self::RoyalFlush => "Royal Flush",
+                        Self::Invalid => "InvalidHand",
+                    }
+                } */
     }
 
     impl Ord for HandRank {
@@ -204,7 +204,9 @@ error[E0533]: expected unit struct, unit variant or constant, found struct varia
                         let cmp_three = kind_rank.cmp(&other_kind_rank);
                         if cmp_three == Ordering::Equal {
                             let mut others_comp = Ordering::Equal;
-                            for (rank, rank_other) in other_ranks.iter().zip(other_other_ranks.iter()) {
+                            for (rank, rank_other) in
+                                other_ranks.iter().zip(other_other_ranks.iter())
+                            {
                                 others_comp = rank.cmp(rank_other);
                                 if others_comp != Ordering::Equal {
                                     break;
@@ -256,7 +258,9 @@ error[E0533]: expected unit struct, unit variant or constant, found struct varia
                         let pairs_cmp = pair_rank.cmp(&other_pair_rank);
                         if pairs_cmp == Ordering::Equal {
                             let mut others_cmp = Ordering::Equal;
-                            for (rank, rank_other) in other_ranks.iter().zip(other_other_ranks.iter()) {
+                            for (rank, rank_other) in
+                                other_ranks.iter().zip(other_other_ranks.iter())
+                            {
                                 others_cmp = rank.cmp(rank_other);
                                 if others_cmp != Ordering::Equal {
                                     break;
@@ -464,7 +468,7 @@ error[E0533]: expected unit struct, unit variant or constant, found struct varia
         }
     }
 
-#[cfg(test)]
+    #[cfg(test)]
     mod tests {
         use crate::poker::{HandRank, PokerRankedHand};
         use ionic_deckhandler::{Card, Rank, Suit};
@@ -514,7 +518,7 @@ error[E0533]: expected unit struct, unit variant or constant, found struct varia
             assert_eq!(hand_arr.evaluate_hand(), HandRank::Invalid);
         }
 
-    /*
+        /*
         #[test]
         #[ignore]
         fn test_multiple_ranks() {
@@ -560,7 +564,4 @@ error[E0533]: expected unit struct, unit variant or constant, found struct varia
             println!("{} = {}", HandRank::RoyalFlush.stringify(), royal_flushes);
         } */
     }
-
 }
-
-

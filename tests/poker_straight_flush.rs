@@ -1,6 +1,6 @@
-use telluric_handeval::poker::{HandRank, PokerRankedHand};
 use ionic_deckhandler::{Card, Rank, Suit};
 use std::cmp::Ordering;
+use telluric_handeval::poker::{HandRank, PokerRankedHand};
 
 #[test]
 fn test_evaluate_straight_flush() {
@@ -43,4 +43,3 @@ fn test_evaluate_straight_flush() {
     ];
     assert_eq!(hand_arr.evaluate_hand(), HandRank::RoyalFlush);
 }
-
