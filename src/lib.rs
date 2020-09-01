@@ -64,8 +64,8 @@ pub mod poker {
                 Self::RoyalFlush => "Royal Flush",
                 Self::StraightFlush { .. } => "Straight Flush",
                 Self::FourOfAKind { .. } => "Four of a kind",
-                Self::FullHouse { .. } =>"Full House",
-                Self::Flush { .. } =>"Flush",
+                Self::FullHouse { .. } => "Full House",
+                Self::Flush { .. } => "Flush",
                 Self::Straight { .. } => "Straight",
                 Self::ThreeOfAKind { .. } => "Three of a kind",
                 Self::TwoPair { .. } => "Two Pair",
@@ -464,7 +464,7 @@ pub mod poker {
     #[cfg(test)]
     mod tests {
         use crate::poker::{HandRank, PokerRankedHand};
-        use ionic_deckhandler::{Card, Rank, Suit, Deck};
+        use ionic_deckhandler::{Card, Deck, Rank, Suit};
         use std::cmp::Ordering;
 
         #[test]
@@ -510,7 +510,7 @@ pub mod poker {
             ];
             assert_eq!(hand_arr.evaluate_hand(), HandRank::Invalid);
         }
-/*
+        /*
         #[test]
         #[ignore]
         fn test_multiple_ranks() {
