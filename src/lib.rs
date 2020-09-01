@@ -58,29 +58,22 @@ pub mod poker {
                 HandRank::Invalid { .. } => 0,
             }
         }
-        /* error[E0533]: expected unit struct, unit variant or constant, found struct variant `Self::Pair`
-          --> src/lib.rs:64:17
-           |
-        64 |                 Self::Pair => "Pair",
-           |                 ^^^^^^^^^^
 
-        error[E0533]: expected unit struct, unit variant or constant, found struct variant `Self::TwoPair`
-          --> src/lib.rs:65:17
-
-                pub fn stringify(&self) -> &'static str {
-                    match self {
-                        Self::Pair => "Pair",
-                        Self::TwoPair => "Two Pair",
-                        Self::ThreeOfAKind => "Three of a kind",
-                        Self::Straight => "Straight",
-                        Self::Flush => "Flush",
-                        Self::FullHouse => "Full House",
-                        Self::FourOfAKind => "Four of a kind",
-                        Self::StraightFlush => "Straight Flush",
-                        Self::RoyalFlush => "Royal Flush",
-                        Self::Invalid => "InvalidHand",
-                    }
-                } */
+        pub fn stringify(&self) -> &'static str {
+            match *self {
+                Self::RoyalFlush => "Royal Flush",
+                Self::StraightFlush { .. } => "Straight Flush",
+                Self::FourOfAKind { .. } => "Four of a kind",
+                Self::FullHouse { .. } =>"Full House",
+                Self::Flush { .. } =>"Flush",
+                Self::Straight { .. } => "Straight",
+                Self::ThreeOfAKind { .. } => "Three of a kind",
+                Self::TwoPair { .. } => "Two Pair",
+                Self::Pair { .. } => "Pair",
+                Self::Highest { .. } => "Nothing",
+                Self::Invalid { .. } => "InvalidHand",
+            }
+        }
     }
 
     impl Ord for HandRank {
@@ -471,7 +464,7 @@ pub mod poker {
     #[cfg(test)]
     mod tests {
         use crate::poker::{HandRank, PokerRankedHand};
-        use ionic_deckhandler::{Card, Rank, Suit};
+        use ionic_deckhandler::{Card, Rank, Suit, Deck};
         use std::cmp::Ordering;
 
         #[test]
@@ -517,8 +510,7 @@ pub mod poker {
             ];
             assert_eq!(hand_arr.evaluate_hand(), HandRank::Invalid);
         }
-
-        /*
+/*
         #[test]
         #[ignore]
         fn test_multiple_ranks() {
@@ -539,21 +531,21 @@ pub mod poker {
                 deck.shuffle_deck();
                 let mut hand_arr: [Card; 5] = [deck[0], deck[1], deck[2], deck[3], deck[4]];
 
-                match evaluate(&mut hand_arr).0 {
-                    HandRank::Pair => pairs += 1,
-                    HandRank::TwoPair => two_pairs += 1,
-                    HandRank::ThreeOfAKind => three_of_a_kinds += 1,
-                    HandRank::Straight => straights += 1,
-                    HandRank::Flush => flush += 1,
-                    HandRank::FullHouse => full_house += 1,
-                    HandRank::FourOfAKind => four_of_a_kind += 1,
-                    HandRank::StraightFlush => straight_flushes += 1,
+                match hand_arr.evaluate_hand() {
+                    HandRank::Pair { .. } => pairs += 1,
+                    HandRank::TwoPair { .. } => two_pairs += 1,
+                    HandRank::ThreeOfAKind { .. } => three_of_a_kinds += 1,
+                    HandRank::Straight { .. } => straights += 1,
+                    HandRank::Flush { .. } => flush += 1,
+                    HandRank::FullHouse { .. } => full_house += 1,
+                    HandRank::FourOfAKind { .. } => four_of_a_kind += 1,
+                    HandRank::StraightFlush { .. } => straight_flushes += 1,
                     HandRank::RoyalFlush => royal_flushes += 1,
                     _ => (),
                 }
             }
             println!("Out of {} hands dealt...\n", hands_dealt);
-            println!("{} = {}", HandRank::Pair.stringify(), pairs);
+            println!("{} = {}", HandRank::Pair::stringify(), pairs);
             println!("{} = {}", HandRank::TwoPair.stringify(), two_pairs);
             println!("{} = {}", HandRank::ThreeOfAKind.stringify(), three_of_a_kinds);
             println!("{} = {}", HandRank::Straight.stringify(), straights);
