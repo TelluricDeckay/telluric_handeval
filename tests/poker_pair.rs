@@ -15,7 +15,7 @@ fn test_evaluate_pair() {
         hand_arr.evaluate_hand(),
         HandRank::Pair {
             pair_rank: Rank::Three,
-            other_ranks: [Rank::King, Rank::Queen, Rank::Ace]
+            other_ranks: [Rank::Ace, Rank::King, Rank::Queen]
         }
     );
 }

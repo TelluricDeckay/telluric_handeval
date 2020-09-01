@@ -76,6 +76,36 @@ pub mod poker {
         }
     }
 
+    trait AceHigh {
+        fn rank_card_ace_high_u8(&self) -> u8;
+
+        fn cmp_ace_high(&self, other: &Self) -> Ordering;
+    }
+
+    impl AceHigh for Rank {
+        fn rank_card_ace_high_u8(&self) -> u8 {
+            match *self {
+                Rank::Two => 2,
+                Rank::Three => 3,
+                Rank::Four => 4,
+                Rank::Five => 5,
+                Rank::Six => 6,
+                Rank::Seven => 7,
+                Rank::Eight => 8,
+                Rank::Nine => 9,
+                Rank::Ten => 10,
+                Rank::Jack => 11,
+                Rank::Queen => 12,
+                Rank::King => 13,
+                Rank::Ace => 14,
+            }
+        }
+
+        fn cmp_ace_high(&self, other: &Self) -> Ordering {
+            self.rank_card_ace_high_u8().cmp(&other.rank_card_ace_high_u8())
+        }
+    }
+    
     impl Ord for HandRank {
         fn cmp(&self, other: &Self) -> Ordering {
             self.partial_cmp(&other)
@@ -122,9 +152,9 @@ pub mod poker {
                         kicker_rank: other_kicker_rank,
                     } = *other
                     {
-                        let kind_cmp = kind_rank.cmp(&other_kind_rank);
+                        let kind_cmp = kind_rank.cmp_ace_high(&other_kind_rank);
                         if kind_cmp == Ordering::Equal {
-                            Some(kicker_rank.cmp(&other_kicker_rank))
+                            Some(kicker_rank.cmp_ace_high(&other_kicker_rank))
                         } else {
                             Some(kind_cmp)
                         }
@@ -141,9 +171,9 @@ pub mod poker {
                         pair_rank: other_pair_rank,
                     } = *other
                     {
-                        let three_cmp = three_kind_rank.cmp(&other_three_kind_rank);
+                        let three_cmp = three_kind_rank.cmp_ace_high(&other_three_kind_rank);
                         if three_cmp == Ordering::Equal {
-                            pair_rank.partial_cmp(&other_pair_rank)
+                            Some(pair_rank.cmp_ace_high(&other_pair_rank))
                         } else {
                             Some(three_cmp)
                         }
@@ -155,7 +185,7 @@ pub mod poker {
                     if let HandRank::Flush { ranks: other_ranks } = *other {
                         let mut hand_comp = Ordering::Equal;
                         for (rank, rank_other) in ranks.iter().zip(other_ranks.iter()) {
-                            hand_comp = rank.cmp(rank_other);
+                            hand_comp = rank.cmp_ace_high(rank_other);
                             if hand_comp != Ordering::Equal {
                                 break;
                             }
@@ -179,7 +209,7 @@ pub mod poker {
                         } else if other_highest_rank == Rank::Ace {
                             Some(Ordering::Less)
                         } else {
-                            highest_rank.partial_cmp(&other_highest_rank)
+                            Some(highest_rank.cmp_ace_high(&other_highest_rank))
                         }
                     } else {
                         self.get_rank_u8().partial_cmp(&other.get_rank_u8())
@@ -194,13 +224,13 @@ pub mod poker {
                         other_ranks: other_other_ranks,
                     } = *other
                     {
-                        let cmp_three = kind_rank.cmp(&other_kind_rank);
+                        let cmp_three = kind_rank.cmp_ace_high(&other_kind_rank);
                         if cmp_three == Ordering::Equal {
                             let mut others_comp = Ordering::Equal;
                             for (rank, rank_other) in
                                 other_ranks.iter().zip(other_other_ranks.iter())
                             {
-                                others_comp = rank.cmp(rank_other);
+                                others_comp = rank.cmp_ace_high(rank_other);
                                 if others_comp != Ordering::Equal {
                                     break;
                                 }
@@ -224,11 +254,11 @@ pub mod poker {
                         kicker_rank: other_kicker_rank,
                     } = *other
                     {
-                        let high_pair_cmp = higher_pair_rank.cmp(&other_higher_pair_rank);
+                        let high_pair_cmp = higher_pair_rank.cmp_ace_high(&other_higher_pair_rank);
                         if high_pair_cmp == Ordering::Equal {
-                            let low_pair_cmp = lower_pair_rank.cmp(&other_lower_pair_rank);
+                            let low_pair_cmp = lower_pair_rank.cmp_ace_high(&other_lower_pair_rank);
                             if low_pair_cmp == Ordering::Equal {
-                                kicker_rank.partial_cmp(&other_kicker_rank)
+                                Some(kicker_rank.cmp_ace_high(&other_kicker_rank))
                             } else {
                                 Some(low_pair_cmp)
                             }
@@ -248,13 +278,13 @@ pub mod poker {
                         other_ranks: other_other_ranks,
                     } = *other
                     {
-                        let pairs_cmp = pair_rank.cmp(&other_pair_rank);
+                        let pairs_cmp = pair_rank.cmp_ace_high(&other_pair_rank);
                         if pairs_cmp == Ordering::Equal {
                             let mut others_cmp = Ordering::Equal;
                             for (rank, rank_other) in
                                 other_ranks.iter().zip(other_other_ranks.iter())
                             {
-                                others_cmp = rank.cmp(rank_other);
+                                others_cmp = rank.cmp_ace_high(rank_other);
                                 if others_cmp != Ordering::Equal {
                                     break;
                                 }
@@ -271,7 +301,7 @@ pub mod poker {
                     if let HandRank::Highest { ranks: other_ranks } = *other {
                         let mut ranks_cmp = Ordering::Equal;
                         for (rank, rank_other) in ranks.iter().zip(other_ranks.iter()) {
-                            ranks_cmp = rank.cmp(rank_other);
+                            ranks_cmp = rank.cmp_ace_high(rank_other);
                             if ranks_cmp != Ordering::Equal {
                                 break;
                             }
@@ -337,7 +367,7 @@ pub mod poker {
             rank_histogram.sort_by(|r1, r2| {
                 let count_cmp = r2.count.cmp(&r1.count);
                 match count_cmp {
-                    Ordering::Equal => r2.rank.cmp(&r1.rank),
+                    Ordering::Equal => r2.rank.cmp_ace_high(&r1.rank),
                     _ => count_cmp,
                 }
             });

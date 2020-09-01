@@ -73,7 +73,7 @@ fn test_evaluate_two_pair() {
 
     // These two tests fail, probably due to the Ace not being counted as high
 
-    /*   assert_eq!(
+    assert_eq!(
         hand_arr1.evaluate_hand().cmp(&hand_arr2.evaluate_hand()),
         Ordering::Less
     );
@@ -81,7 +81,7 @@ fn test_evaluate_two_pair() {
     assert_eq!(
         hand_arr6.evaluate_hand().cmp(&hand_arr7.evaluate_hand()),
         Ordering::Less
-    ); */
+    ); 
 
     assert_eq!(
         hand_arr2.evaluate_hand().cmp(&hand_arr3.evaluate_hand()),
