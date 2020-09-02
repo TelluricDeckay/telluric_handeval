@@ -102,10 +102,11 @@ pub mod poker {
         }
 
         fn cmp_ace_high(&self, other: &Self) -> Ordering {
-            self.rank_card_ace_high_u8().cmp(&other.rank_card_ace_high_u8())
+            self.rank_card_ace_high_u8()
+                .cmp(&other.rank_card_ace_high_u8())
         }
     }
-    
+
     impl Ord for HandRank {
         fn cmp(&self, other: &Self) -> Ordering {
             self.partial_cmp(&other)

@@ -45,7 +45,7 @@ fn test_evaluate_full_house() {
     assert_eq!(
         hand_arr2.evaluate_hand().cmp(&hand_arr3.evaluate_hand()),
         Ordering::Greater
-    ); 
+    );
 
     assert_eq!(
         hand_arr1.evaluate_hand().cmp(&hand_arr3.evaluate_hand()),
