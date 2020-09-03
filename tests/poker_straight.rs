@@ -128,5 +128,4 @@ fn test_compare_straights() {
         hand_arr1.evaluate_hand().cmp(&hand_arr2.evaluate_hand()),
         Ordering::Greater
     );
-
 }
