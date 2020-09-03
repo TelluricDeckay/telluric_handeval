@@ -107,4 +107,26 @@ fn test_compare_straights() {
         hand_arr1.evaluate_hand().cmp(&hand_arr3.evaluate_hand()),
         Ordering::Equal
     );
+
+    let hand_arr1 = [
+        Card::new(Rank::Six, Suit::Diamonds),
+        Card::new(Rank::Three, Suit::Spades),
+        Card::new(Rank::Five, Suit::Diamonds),
+        Card::new(Rank::Two, Suit::Spades),
+        Card::new(Rank::Four, Suit::Hearts),
+    ];
+
+    let hand_arr2 = [
+        Card::new(Rank::Five, Suit::Diamonds),
+        Card::new(Rank::Two, Suit::Spades),
+        Card::new(Rank::Four, Suit::Diamonds),
+        Card::new(Rank::Ace, Suit::Spades),
+        Card::new(Rank::Three, Suit::Hearts),
+    ];
+
+    assert_eq!(
+        hand_arr1.evaluate_hand().cmp(&hand_arr2.evaluate_hand()),
+        Ordering::Greater
+    );
+
 }
