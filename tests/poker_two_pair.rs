@@ -70,9 +70,6 @@ fn test_evaluate_two_pair() {
     );
 
     // Comparator tests.
-
-    // These two tests fail, probably due to the Ace not being counted as high
-
     assert_eq!(
         hand_arr1.evaluate_hand().cmp(&hand_arr2.evaluate_hand()),
         Ordering::Less

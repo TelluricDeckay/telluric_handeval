@@ -108,6 +108,39 @@ pub mod poker {
     }
 
     impl Ord for HandRank {
+        // The description and example code don't show up in the docs because
+        // cmp() is a private method.
+
+        /// Compare two poker hands of the same rank to determine which is higher
+        ///
+        /// Example:
+        ///
+        /// ```
+        /// use ionic_deckhandler::{Card, Rank, Suit};
+        /// use telluric_handeval::poker::{HandRank, PokerRankedHand};
+        /// use std::cmp::Ordering;
+        ///
+        /// let hand_arr1: [Card; 5] = [
+        ///     Card::new(Rank::Queen, Suit::Clubs),
+        ///     Card::new(Rank::Three, Suit::Hearts),
+        ///     Card::new(Rank::Three, Suit::Diamonds),
+        ///     Card::new(Rank::King, Suit::Clubs),
+        ///     Card::new(Rank::Queen, Suit::Clubs),
+        /// ];
+        ///
+        /// let hand_arr2: [Card; 5] = [
+        ///     Card::new(Rank::Queen, Suit::Clubs),
+        ///     Card::new(Rank::Ace, Suit::Hearts),
+        ///     Card::new(Rank::Ace, Suit::Diamonds),
+        ///     Card::new(Rank::King, Suit::Clubs),
+        ///     Card::new(Rank::Queen, Suit::Clubs),
+        /// ];
+        ///
+        /// assert_eq!(
+        ///     hand_arr1.evaluate_hand().cmp(&hand_arr2.evaluate_hand()),
+        ///     Ordering::Less);
+        /// ```
+        #[inline]
         fn cmp(&self, other: &Self) -> Ordering {
             self.partial_cmp(&other)
                 .expect("Error getting hand ordering.")
@@ -328,6 +361,8 @@ pub mod poker {
     }
 
     impl PokerRankedHand for [Card; 5] {
+        /// Evaluate a poker hand to determine it's poker rank (i.e. pair, two-of-a-kind, etc)
+        #[inline]
         fn evaluate_hand(&self) -> HandRank {
             // Algorithm source: https://nsayer.blogspot.com/2007/07/algorithm-for-evaluating-poker-hands.html
             let mut cards = self.clone();
