@@ -362,6 +362,30 @@ pub mod poker {
 
     impl PokerRankedHand for [Card; 5] {
         /// Evaluate a poker hand to determine it's poker rank (i.e. pair, two-of-a-kind, etc)
+        ///
+        /// Example:
+        ///
+        /// ```
+        /// use ionic_deckhandler::{Card, Rank, Suit};
+        /// use telluric_handeval::poker::{HandRank, PokerRankedHand};
+        ///
+        /// let hand_arr1: [Card; 5] = [
+        ///     Card::new(Rank::Queen, Suit::Clubs),
+        ///     Card::new(Rank::Three, Suit::Hearts),
+        ///     Card::new(Rank::Three, Suit::Diamonds),
+        ///     Card::new(Rank::King, Suit::Clubs),
+        ///     Card::new(Rank::Queen, Suit::Clubs),
+        /// ];
+        ///
+        /// assert_eq!(
+        ///     hand_arr1.evaluate_hand(),
+        ///     HandRank::TwoPair {
+        ///         higher_pair_rank: Rank::Queen,
+        ///         lower_pair_rank: Rank::Three,
+        ///         kicker_rank: Rank::King,
+        ///     }
+        /// );
+        /// ```
         #[inline]
         fn evaluate_hand(&self) -> HandRank {
             // Algorithm source: https://nsayer.blogspot.com/2007/07/algorithm-for-evaluating-poker-hands.html
