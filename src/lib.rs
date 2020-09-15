@@ -76,6 +76,21 @@ pub mod poker {
         }
     }
 
+    #[macro_export]
+    macro_rules! stringify {
+        (HandRank::RoyalFlush) => ("Royal Flush");
+        (HandRank::StraightFlush) => ("Straight Flush");
+        (HandRank::FourOfAKind) => ("Four of a kind");
+        (HandRank::FullHouse) => ("Full House");
+        (HandRank::Flush) => ("Flush");
+        (HandRank::Straight) => ("Straight");
+        (HandRank::ThreeOfAKind) => ("Three of a kind");
+        (HandRank::TwoPair) => ("Two Pair");
+        (HandRank::Pair) => ("Pair");
+        (HandRank::Highest) => ("Nothing");
+        (HandRank::Invalid) => ("InvalidHand");
+    }
+
     trait AceHigh {
         fn rank_card_ace_high_u8(&self) -> u8;
 
@@ -102,45 +117,11 @@ pub mod poker {
         }
 
         fn cmp_ace_high(&self, other: &Self) -> Ordering {
-            self.rank_card_ace_high_u8()
-                .cmp(&other.rank_card_ace_high_u8())
+            self.rank_card_ace_high_u8().cmp(&other.rank_card_ace_high_u8())
         }
     }
-
+    
     impl Ord for HandRank {
-        // The description and example code don't show up in the docs because
-        // cmp() is a private method.
-
-        /// Compare two poker hands of the same rank to determine which is higher
-        ///
-        /// Example:
-        ///
-        /// ```
-        /// use ionic_deckhandler::{Card, Rank, Suit};
-        /// use telluric_handeval::poker::{HandRank, PokerRankedHand};
-        /// use std::cmp::Ordering;
-        ///
-        /// let hand_arr1: [Card; 5] = [
-        ///     Card::new(Rank::Queen, Suit::Clubs),
-        ///     Card::new(Rank::Three, Suit::Hearts),
-        ///     Card::new(Rank::Three, Suit::Diamonds),
-        ///     Card::new(Rank::King, Suit::Clubs),
-        ///     Card::new(Rank::Queen, Suit::Clubs),
-        /// ];
-        ///
-        /// let hand_arr2: [Card; 5] = [
-        ///     Card::new(Rank::Queen, Suit::Clubs),
-        ///     Card::new(Rank::Ace, Suit::Hearts),
-        ///     Card::new(Rank::Ace, Suit::Diamonds),
-        ///     Card::new(Rank::King, Suit::Clubs),
-        ///     Card::new(Rank::Queen, Suit::Clubs),
-        /// ];
-        ///
-        /// assert_eq!(
-        ///     hand_arr1.evaluate_hand().cmp(&hand_arr2.evaluate_hand()),
-        ///     Ordering::Less);
-        /// ```
-        #[inline]
         fn cmp(&self, other: &Self) -> Ordering {
             self.partial_cmp(&other)
                 .expect("Error getting hand ordering.")
@@ -361,32 +342,6 @@ pub mod poker {
     }
 
     impl PokerRankedHand for [Card; 5] {
-        /// Evaluate a poker hand to determine it's poker rank (i.e. pair, two-of-a-kind, etc)
-        ///
-        /// Example:
-        ///
-        /// ```
-        /// use ionic_deckhandler::{Card, Rank, Suit};
-        /// use telluric_handeval::poker::{HandRank, PokerRankedHand};
-        ///
-        /// let hand_arr1: [Card; 5] = [
-        ///     Card::new(Rank::Queen, Suit::Clubs),
-        ///     Card::new(Rank::Three, Suit::Hearts),
-        ///     Card::new(Rank::Three, Suit::Diamonds),
-        ///     Card::new(Rank::King, Suit::Clubs),
-        ///     Card::new(Rank::Queen, Suit::Clubs),
-        /// ];
-        ///
-        /// assert_eq!(
-        ///     hand_arr1.evaluate_hand(),
-        ///     HandRank::TwoPair {
-        ///         higher_pair_rank: Rank::Queen,
-        ///         lower_pair_rank: Rank::Three,
-        ///         kicker_rank: Rank::King,
-        ///     }
-        /// );
-        /// ```
-        #[inline]
         fn evaluate_hand(&self) -> HandRank {
             // Algorithm source: https://nsayer.blogspot.com/2007/07/algorithm-for-evaluating-poker-hands.html
             let mut cards = self.clone();
@@ -600,9 +555,8 @@ pub mod poker {
             ];
             assert_eq!(hand_arr.evaluate_hand(), HandRank::Invalid);
         }
-        /*
+        
         #[test]
-        #[ignore]
         fn test_multiple_ranks() {
             let mut deck = Card::get_deck();
             let mut pairs = 0;
@@ -635,15 +589,15 @@ pub mod poker {
                 }
             }
             println!("Out of {} hands dealt...\n", hands_dealt);
-            println!("{} = {}", HandRank::Pair::stringify(), pairs);
-            println!("{} = {}", HandRank::TwoPair.stringify(), two_pairs);
-            println!("{} = {}", HandRank::ThreeOfAKind.stringify(), three_of_a_kinds);
-            println!("{} = {}", HandRank::Straight.stringify(), straights);
-            println!("{} = {}", HandRank::Flush.stringify(), flush);
-            println!("{} = {}", HandRank::FullHouse.stringify(), full_house);
-            println!("{} = {}", HandRank::FourOfAKind.stringify(), four_of_a_kind);
-            println!("{} = {}", HandRank::StraightFlush.stringify(), straight_flushes);
-            println!("{} = {}", HandRank::RoyalFlush.stringify(), royal_flushes);
-        } */
+            println!("{} = {}", stringify!(HandRank::Pair), pairs);
+            println!("{} = {}", stringify!(HandRank::TwoPair), two_pairs);
+            println!("{} = {}", stringify!(HandRank::ThreeOfAKind), three_of_a_kinds);
+            println!("{} = {}", stringify!(HandRank::Straight), straights);
+            println!("{} = {}", stringify!(HandRank::Flush), flush);
+            println!("{} = {}", stringify!(HandRank::FullHouse), full_house);
+            println!("{} = {}", stringify!(HandRank::FourOfAKind), four_of_a_kind);
+            println!("{} = {}", stringify!(HandRank::StraightFlush), straight_flushes);
+            println!("{} = {}", stringify!(HandRank::RoyalFlush), royal_flushes);
+        } 
     }
 }
