@@ -14,4 +14,5 @@ publish = false
 [dependencies]
 #ionic_deckhandler = { path = "../ionic-deckhandler" }
 
-ionic_deckhandler = { git = "https://github.com/TelluricDeckay/ionic-deckhandler", branch = "trunk" }
+# ionic_deckhandler = { git = "https://github.com/TelluricDeckay/ionic-deckhandler", branch = "trunk" }
+ionic_deckhandler = "0.1.0"
