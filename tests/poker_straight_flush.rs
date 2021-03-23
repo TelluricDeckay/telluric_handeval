@@ -1,5 +1,4 @@
 use ionic_deckhandler::{Card, Rank, Suit};
-use std::cmp::Ordering;
 use telluric_handeval::poker::{HandRank, PokerRankedHand};
 
 #[test]

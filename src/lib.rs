@@ -78,17 +78,39 @@ pub mod poker {
 
     #[macro_export]
     macro_rules! stringify {
-        (HandRank::RoyalFlush) => ("Royal Flush");
-        (HandRank::StraightFlush) => ("Straight Flush");
-        (HandRank::FourOfAKind) => ("Four of a kind");
-        (HandRank::FullHouse) => ("Full House");
-        (HandRank::Flush) => ("Flush");
-        (HandRank::Straight) => ("Straight");
-        (HandRank::ThreeOfAKind) => ("Three of a kind");
-        (HandRank::TwoPair) => ("Two Pair");
-        (HandRank::Pair) => ("Pair");
-        (HandRank::Highest) => ("Nothing");
-        (HandRank::Invalid) => ("InvalidHand");
+        (HandRank::RoyalFlush) => {
+            "Royal Flush"
+        };
+        (HandRank::StraightFlush) => {
+            "Straight Flush"
+        };
+        (HandRank::FourOfAKind) => {
+            "Four of a kind"
+        };
+        (HandRank::FullHouse) => {
+            "Full House"
+        };
+        (HandRank::Flush) => {
+            "Flush"
+        };
+        (HandRank::Straight) => {
+            "Straight"
+        };
+        (HandRank::ThreeOfAKind) => {
+            "Three of a kind"
+        };
+        (HandRank::TwoPair) => {
+            "Two Pair"
+        };
+        (HandRank::Pair) => {
+            "Pair"
+        };
+        (HandRank::Highest) => {
+            "Nothing"
+        };
+        (HandRank::Invalid) => {
+            "InvalidHand"
+        };
     }
 
     trait AceHigh {
@@ -117,10 +139,11 @@ pub mod poker {
         }
 
         fn cmp_ace_high(&self, other: &Self) -> Ordering {
-            self.rank_card_ace_high_u8().cmp(&other.rank_card_ace_high_u8())
+            self.rank_card_ace_high_u8()
+                .cmp(&other.rank_card_ace_high_u8())
         }
     }
-    
+
     impl Ord for HandRank {
         fn cmp(&self, other: &Self) -> Ordering {
             self.partial_cmp(&other)
@@ -344,7 +367,7 @@ pub mod poker {
     impl PokerRankedHand for [Card; 5] {
         fn evaluate_hand(&self) -> HandRank {
             // Algorithm source: https://nsayer.blogspot.com/2007/07/algorithm-for-evaluating-poker-hands.html
-            let mut cards = self.clone();
+            let mut cards = *self;
             // Sort cards by rank descending. Useful for straights and highest.
             cards.sort_by(|c1, c2| c2.get_rank().cmp(&c1.get_rank()));
 
@@ -510,7 +533,6 @@ pub mod poker {
     mod tests {
         use crate::poker::{HandRank, PokerRankedHand};
         use ionic_deckhandler::{Card, Deck, Rank, Suit};
-        use std::cmp::Ordering;
 
         #[test]
         fn test_evaluate_nothing() {
@@ -555,7 +577,7 @@ pub mod poker {
             ];
             assert_eq!(hand_arr.evaluate_hand(), HandRank::Invalid);
         }
-        
+
         #[test]
         fn test_multiple_ranks() {
             let mut deck = Card::get_deck();
@@ -573,7 +595,7 @@ pub mod poker {
 
             for _i in 0..hands_dealt {
                 deck.shuffle_deck();
-                let mut hand_arr: [Card; 5] = [deck[0], deck[1], deck[2], deck[3], deck[4]];
+                let hand_arr: [Card; 5] = [deck[0], deck[1], deck[2], deck[3], deck[4]];
 
                 match hand_arr.evaluate_hand() {
                     HandRank::Pair { .. } => pairs += 1,
@@ -591,13 +613,21 @@ pub mod poker {
             println!("Out of {} hands dealt...\n", hands_dealt);
             println!("{} = {}", stringify!(HandRank::Pair), pairs);
             println!("{} = {}", stringify!(HandRank::TwoPair), two_pairs);
-            println!("{} = {}", stringify!(HandRank::ThreeOfAKind), three_of_a_kinds);
+            println!(
+                "{} = {}",
+                stringify!(HandRank::ThreeOfAKind),
+                three_of_a_kinds
+            );
             println!("{} = {}", stringify!(HandRank::Straight), straights);
             println!("{} = {}", stringify!(HandRank::Flush), flush);
             println!("{} = {}", stringify!(HandRank::FullHouse), full_house);
             println!("{} = {}", stringify!(HandRank::FourOfAKind), four_of_a_kind);
-            println!("{} = {}", stringify!(HandRank::StraightFlush), straight_flushes);
+            println!(
+                "{} = {}",
+                stringify!(HandRank::StraightFlush),
+                straight_flushes
+            );
             println!("{} = {}", stringify!(HandRank::RoyalFlush), royal_flushes);
-        } 
+        }
     }
 }
