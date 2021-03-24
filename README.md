@@ -15,6 +15,7 @@ See
 
 ## Help and Support
 
+* [Discussions](https://github.com/TelluricDeckay/telluric_handeval/discussions)
 * [Issues](https://github.com/TelluricDeckay/telluric_handeval/issues)
 * [Chat room](https://telluric-deckay.zulipchat.com/)
 * Emails listed in [Cargo.toml](https://github.com/TelluricDeckay/telluric_handeval/blob/trunk/Cargo.toml)
