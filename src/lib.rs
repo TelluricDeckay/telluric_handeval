@@ -436,18 +436,16 @@ pub mod poker {
                                 .try_into()
                                 .unwrap(),
                         }
+                    } else if rank_histogram[0].count == 3 {
+                        HandRank::ThreeOfAKind {
+                            kind_rank: rank_histogram[0].rank,
+                            other_ranks: [rank_histogram[1].rank, rank_histogram[2].rank],
+                        }
                     } else {
-                        if rank_histogram[0].count == 3 {
-                            HandRank::ThreeOfAKind {
-                                kind_rank: rank_histogram[0].rank,
-                                other_ranks: [rank_histogram[1].rank, rank_histogram[2].rank],
-                            }
-                        } else {
-                            HandRank::TwoPair {
-                                higher_pair_rank: rank_histogram[0].rank,
-                                lower_pair_rank: rank_histogram[1].rank,
-                                kicker_rank: rank_histogram[2].rank,
-                            }
+                        HandRank::TwoPair {
+                            higher_pair_rank: rank_histogram[0].rank,
+                            lower_pair_rank: rank_histogram[1].rank,
+                            kicker_rank: rank_histogram[2].rank,
                         }
                     }
                 }
